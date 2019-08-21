@@ -1,0 +1,41 @@
+	! Intermediate Positions above the table to stop the arm from smashing into table.
+	CONST robtarget ImmediatePoint1:=[[430,125,450],[0,0,1,0],[0,-1,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+	CONST robtarget ImmediatePoint2:=[[265,165,450],[0,0,1,0],[0,-1,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+	CONST robtarget ImmediatePoint3:=[[0,409,450],[0,0,1,0],[1,-1,1,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+	CONST robtarget MoveToHome:=[[510,0,450],[0.026176948,0,-0.999657325,0],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+  	CONST robtarget StartPoint:=[[20,409,24],[0,0,1,0],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+	
+	MODULE DecorationFinal
+    CONST robtarget EndPoint:=[[520,0,145],[0,0,1,0],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    
+    PROC PathToConveyorFromHome()
+        MoveL ImmediatePoint1,v1000,z100,tool0\WObj:=wobj0;
+        MoveL ImmediatePoint2,v1000,z100,tool0\WObj:=wobj0;
+        MoveL ImmediatePoint3,v1000,z100,tool0\WObj:=wobj0;
+        ! Lawrence's Robtarget of the Qwirkle Position to the conveyor.
+        
+    ENDPROC
+    PROC InitialiseStart()
+        MoveL MoveToHome,v1000,z100,tool0\WObj:=wobj0;
+    ENDPROC
+    PROC PathToHomeFromConv()       
+        MoveL ImmediatePoint3,v1000,z100,tool0\WObj:=wobj0;
+        MoveL ImmediatePoint2,v1000,z100,tool0\WObj:=wobj0;
+        MoveL ImmediatePoint1,v1000,z100,tool0\WObj:=wobj0;
+        ! Lawrence's Robtarget of Qwirkle Position on the table (orientation of qwirkle is not handled yet)
+    ENDPROC
+    PROC ResetConveyorPath()
+        MoveL ImmediatePoint3,v1000,z100,tool0\WObj:=wobj0;
+    ENDPROC
+    PROC ResetTablePath()
+        MoveL ImmediatePoint1,v1000,z100,tool0\WObj:=wobj0;
+    ENDPROC
+    PROC ToStartPoint()
+        MoveL StartPoint,v1000,z100,tool0\WObj:=wobj0;
+    ENDPROC
+    PROC ToEndPoint()
+        MoveL EndPoint,v1000,z100,tool0\WObj:=wobj0;
+    ENDPROC
+    
+    
+ENDMODULE
