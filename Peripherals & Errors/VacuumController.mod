@@ -21,12 +21,7 @@ MODULE VacuumController
     !   This is the entry point of your program
     !
     !***********************************************************
-    PROC main()
-        !Add your code here
-
-    ENDPROC
     
-
     PROC turnOnVacuum()
         SetDO DO10_1,1;
         ClkStart clk;
@@ -34,8 +29,8 @@ MODULE VacuumController
 
     PROC turnOffVacuum()
         turnOffGripper;
-        Reset(DO10_1);
-        ClkReset(clk);
+        SetDO DO10_1, 0;
+        ClkReset clk;
     ENDPROC
 
     PROC turnOnGripper()
@@ -45,7 +40,7 @@ MODULE VacuumController
     ENDPROC
 
     PROC turnOffGripper()
-        Reset(DO10_2);
+        SetDO DO10_2, 0;
     ENDPROC
     
     PROC checkTime()
