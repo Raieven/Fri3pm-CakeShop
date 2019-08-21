@@ -3,7 +3,7 @@
 	CONST robtarget ImmediatePoint2:=[[265,165,450],[0,0,1,0],[0,-1,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
 	CONST robtarget ImmediatePoint3:=[[0,409,450],[0,0,1,0],[1,-1,1,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
 	CONST robtarget MoveToHome:=[[510,0,450],[0.026176948,0,-0.999657325,0],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
-  	CONST robtarget StartPoint:=[[20,409,24],[0,0,1,0],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget StartPoint:=[[20,409,24],[0,0,1,0],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
 	
 	MODULE DecorationFinal
     CONST robtarget EndPoint:=[[520,0,145],[0,0,1,0],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
