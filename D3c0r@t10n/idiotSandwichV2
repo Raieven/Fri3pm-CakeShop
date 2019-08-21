@@ -7,11 +7,11 @@ MODULE DecorationFinal
     CONST robtarget MoveToHome:=[[410,0,450],[0,0,-1,0],[0,0,-1,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
     CONST num offSet := 12;
     !Dummy Array for Testing
-    CONST num tcpArray{3,7} := [[20,409,24,520,0,150,45],[20,409,24,500,0,150,0],[20,409,24,450,0,150,45]];
+    CONST num qwirkleArray{3,7} := [[20,409,24,520,0,150,45],[20,409,24,500,0,150,0],[20,409,24,450,0,150,45]];
     
     PROC Main()
         MoveL MoveToHome,v1000,z100,tool0\WObj:=wobj0;
-        decorationProcess tcpArray;
+        decorationProcess qwirkleArray;
         MoveL MoveToHome,v1000,z100,tool0\WObj:=wobj0;
     ENDPROC
     
