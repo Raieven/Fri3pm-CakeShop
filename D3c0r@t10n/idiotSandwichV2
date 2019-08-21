@@ -5,6 +5,7 @@ MODULE DecorationFinal
     CONST robtarget ImmediatePoint3:=[[0,409,450],[0,0,1,0],[1,-1,1,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
     CONST robtarget StartPoint:=[[20,409,24],[0,0,-1,0],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
     CONST robtarget MoveToHome:=[[410,0,450],[0,0,-1,0],[0,0,-1,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST num offSet := 12;
     !Dummy Array for Testing
     CONST num tcpArray{3,7} := [[20,409,24,520,0,150,45],[20,409,24,500,0,150,0],[20,409,24,450,0,150,45]];
     
@@ -30,10 +31,10 @@ MODULE DecorationFinal
             ! This part reads in the first line.
             xStart := array{a,1};            
             yStart := array{a,2};
-            zStart := array{a,3};
+            zStart := array{a,3}+offSet;
             xEnd := array{a,4};            
             yEnd := array{a,5};
-            zEnd := array{a,6};
+            zEnd := array{a,6}+offSet;
             orientation := array{a,7};
             
             qwirkleLocation := [[xStart,yStart,zStart],[0,0,1,0],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
@@ -82,7 +83,7 @@ MODULE DecorationFinal
 
     PROC RotateTool(num Orientation,robtarget a)
         MoveL RelTool(a,0,0,0,\Rz:= Orientation),v1000,fine,tool0\WObj:=wobj0;
-        WaitTime 1;
+        WaitTime 2;
         !Vacuum Off
         WaitTime 1;
         
