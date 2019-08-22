@@ -17,6 +17,11 @@ MODULE MTRN4230_Server_Sample1
     VAR num letterArray{3,100,1000};
     
     VAR string messageArray{10000};
+    VAR num blockArray{50,7};
+    VAR num leftOverArray{50,6};
+    VAR bool errorFlag;
+    VAR string errorMessage;
+    
     
     PROC Main ()
         
@@ -30,6 +35,9 @@ MODULE MTRN4230_Server_Sample1
         VAR string received_str;
         VAR num count := 1;
         VAR string end_str := "end";
+        VAR string ack_str := "ACK";
+        
+        errorMessage := "errorerror";
         
         ListenForAndAcceptConnection;
         
@@ -38,14 +46,23 @@ MODULE MTRN4230_Server_Sample1
         SocketReceive client_socket \Str:=received_str;
             
         messageArray{count} := received_str;
-        SocketSend client_socket \Str:=("ACK");
+        SocketSend client_socket \Str:=(ack_str+"\0A");
         count := count + 1;
-        WHILE (received_str <> end_str) DO
+        !WaitTime 0.001;
+        WHILE (received_str <> (end_str+"\0A")) DO
             SocketReceive client_socket \Str:=received_str;
             messageArray{count} := received_str;
-            SocketSend client_socket \Str:=("ACK");
+            IF count MOD 2 = 1 THEN
+                SocketSend client_socket \Str:=(ack_str+"\0A");
+            ELSE
+                sendError errorMessage;
+            ENDIF
             count := count+1;
+            !WaitTime 0.001;
         ENDWHILE
+        
+        str2BlockTraj messageArray, blockArray, leftOverArray;
+        !str2LetterTraj messageArray, letterArray;
         ! Send the string back to the client, adding a line feed character.
         ! SocketSend client_socket \Str:=(received_str + "\0A");
 
@@ -78,12 +95,17 @@ MODULE MTRN4230_Server_Sample1
         SocketClose client_socket;
     ENDPROC
     
+    PROC sendError(string errorMessage)
+        SocketSend client_socket \Str:=("0, "+errorMessage+"\0A");
+        
+    ENDPROC
+    
     PROC str2LetterTraj(string messageArray{*}, VAR num letterArray{*,*,*})
         VAR num numLetters;
         VAR num numCoordinates{100};
         VAR bool convertStatus;
-        VAR num count;
-        VAR num count2;
+        !VAR num count;
+        !VAR num count2;
         VAR num posInStr;
         VAR num i;
         VAR num j;
@@ -129,40 +151,73 @@ MODULE MTRN4230_Server_Sample1
         VAR num numBlocks;
         VAR num numLeftOver;
         VAR bool convertStatus;
-        VAR num count;
+        !VAR num count;
+        VAR num posInStr;
         VAR num i;
+        VAR num j;
         
-        convertStatus:=StrToVal(messageArray{2}, numBlocks);
-        convertStatus:=StrToVal(messageArray{3}, numLeftOver);
+        posInStr := 2;
+        convertStatus:=StrToVal(messageArray{posInStr}, numBlocks);
+        posInStr := posInStr + 1;
+        convertStatus:=StrToVal(messageArray{posInStr}, numLeftOver);
+        posInStr := posInStr + 1;
         
-        count := 1;
-        FOR i FROM 1 TO 7*numBlocks STEP 7 DO
-            ! x coordinate of cake block
-            convertStatus := StrToVal(messageArray{i+3},blockArray{count,1});
-            ! y coordinate of cake block
-            convertStatus := StrToVal(messageArray{i+4},blockArray{count,2});
-            ! z coordinate of cake block
-            convertStatus := StrToVal(messageArray{i+5},blockArray{count,3});
-            ! x coordinate of conveyor block
-            convertStatus := StrToVal(messageArray{i+6},blockArray{count,4});
-            ! y coordinate of conveyor block
-            convertStatus := StrToVal(messageArray{i+7},blockArray{count,5});
-            ! z coordinate of conveyor block
-            convertStatus := StrToVal(messageArray{i+8},blockArray{count,6});
-            ! orientation of block
-            convertStatus := StrToVal(messageArray{i+9},blockArray{count,7});
-            count := count + 1;
+        !count := 1;
+        FOR i FROM 1 TO numBlocks DO
+            FOR j FROM 1 TO 7 DO
+                convertStatus := StrToVal(messageArray{posInStr},blockArray{i,j});
+                posInStr := posInStr + 1;
+            ENDFOR
+            
+!            ! x coordinate of cake block
+!            convertStatus := StrToVal(messageArray{posInStr},blockArray{i,1});
+!            posInStr := posInStr + 1;
+!            ! y coordinate of cake block
+!            convertStatus := StrToVal(messageArray{posInStr},blockArray{i,2});
+!            posInStr := posInStr + 1;
+!            ! z coordinate of cake block
+!            convertStatus := StrToVal(messageArray{posInStr},blockArray{count,3});
+!            posInStr := posInStr + 1;
+!            ! x coordinate of conveyor block
+!            convertStatus := StrToVal(messageArray{posInStr},blockArray{count,4});
+!            posInStr := posInStr + 1;
+!            ! y coordinate of conveyor block
+!            convertStatus := StrToVal(messageArray{posInStr},blockArray{count,5});
+!            posInStr := posInStr + 1;
+!            ! z coordinate of conveyor block
+!            convertStatus := StrToVal(messageArray{posInStr},blockArray{count,6});
+!            posInStr := posInStr + 1;
+!            ! orientation of block
+!            convertStatus := StrToVal(messageArray{posInStr},blockArray{count,7});
+!            posInStr := posInStr + 1;
+!            count := count + 1;
         ENDFOR
         
-        count := 1;
-        FOR i FROM 1 TO 3*numLeftOver STEP 3 DO
-            !x coordinate of leftover block
-            convertStatus := StrToVal(messageArray{count+3+7*numBlocks},leftOverArray{count,1});
-            !y coordinate of leftover block
-            convertStatus := StrToVal(messageArray{count+3+7*numBlocks+1},leftOverArray{count,2});
-            !y coordinate of leftover block
-            convertStatus := StrToVal(messageArray{count+3+7*numBlocks+2},leftOverArray{count,3});
-            count := count + 1;
+        !count := 1;
+        FOR i FROM 1 TO numLeftOver DO
+            FOR j FROM 1 TO 6 DO
+                convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,j});
+            posInStr := posInStr + 1;
+            ENDFOR
+!            !x coordinate of leftover block
+!            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,1});
+!            posInStr := posInStr + 1;
+!            !y coordinate of leftover block
+!            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,2});
+!            posInStr := posInStr + 1;
+!            !y coordinate of leftover block
+!            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,3});
+!            posInStr := posInStr + 1;
+!            !x coordinate of junk area
+!            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,4});
+!            posInStr := posInStr + 1;
+!            !y coordinate of junk area
+!            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,5});
+!            posInStr := posInStr + 1;
+!            !y coordinate of junk area
+!            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,6});
+!            posInStr := posInStr + 1;
+!            count := count + 1;
         ENDFOR
         
     ENDPROC

@@ -14,7 +14,7 @@ end
 sizeOfStrArr = size(m,2);
     
 fopen(t);
-
+count = 0;
 for i = 1:sizeOfStrArr
     ack = '';
     fprintf(t, m(i));
@@ -22,10 +22,11 @@ for i = 1:sizeOfStrArr
         %wait for ack
     end
     ack = fscanf(t);
-    if (ack == "ACK\n")
+    if (contains(ack, "ACK"))
         %string was received
-    else
-        %error
+    elseif (ack(1) == '0')
+        count = count+1;
+        
     end
 end
 fprintf(t, endmessage);
