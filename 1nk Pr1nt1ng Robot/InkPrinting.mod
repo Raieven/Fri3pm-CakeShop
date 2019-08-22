@@ -2,12 +2,14 @@
 !Author Name: Mike Ni
 !ZID: Z5083683
 !Description: 
-!input a 3xnxm matrix data, recevied from GUI part, see GUI for more info
-!runs program to move TCP along a given trajectory with a given speed dicided by boldness of letter
+! runs program to move TCP along a given trajectory with a given speed dicided by boldness of letter
 !
+!input 
+! data_matrix - a 3xnxm matrix data, recevied from GUI part, see GUI for more info
+! z_coor - the z coordinate for ink printing, assume to be 147
 MODULE InkPrinting
     !use "draw_letter data_matrix" to run
-    PROC draw_letter(num data_matrix{*,*,*})
+    PROC draw_letter(num data_matrix{*,*,*}, num z_coor)
         VAR num x;
         VAR num y;
         VAR num z;
@@ -32,19 +34,19 @@ MODULE InkPrinting
                 speed := [100, 500, 5000, 1000];
             ENDIF
             !for each point on trajectory
-            FOR i FROM 1 TO DIM(data_matrix,1) DO
+            FOR i FROM 1 TO DIM(data_matrix,3) DO
                 x := data_matrix{2,index,i};
                 y := data_matrix{3,index,i};
                 
                 ! find next point, except for last point
-                IF i <> DIM(x_array, 1) THEN
+                IF i <> DIM(data_matrix, 3) THEN
                     x_next := data_matrix{2,index+1,i};
                     y_next := data_matrix{3,index+1,i};
                 ELSE
                     x_next := x;
                     y_next := y;
                 ENDIF
-                z := z_array;
+                z := z_coor; 
                 curr := [x, y, z];
                 next := [x_next, y_next, z];
                 distance_from_next := Distance(curr, next);
