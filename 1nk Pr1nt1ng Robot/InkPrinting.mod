@@ -28,6 +28,7 @@ MODULE InkPrinting
         !for each letter
         FOR index FROM 1 TO DIM(data_matrix, 2) DO
             bolded := data_matrix{1,index,1};
+            ! check boldness to set speed. 0 - 50mm/s; 1 - 100mm/s
             IF bolded = 0 THEN
                 speed := [50, 500, 5000, 1000];
             ELSE
@@ -58,8 +59,6 @@ MODULE InkPrinting
                     
                 ENDIF
                 pathLoc := [[x, y, z],[0,0,-1,0],[0,0,0,0],[9E9,9E9,9E9,9E9,9E9,9E9]];
-                ! check boldness to set speed. 0 - 50mm/s; 1 - 100mm/s
-                
                 MoveL pathLoc, speed, z0, tSCup;
                     
                 !if next point is very far away, move tcp away from object surface
