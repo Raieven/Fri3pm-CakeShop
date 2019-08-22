@@ -38,51 +38,25 @@ MODULE MTRN4230_Server_Sample1
     ENDPROC
 
     PROC MainServer()
-        
-        VAR string received_str;
-        VAR num count := 1;
-        VAR string end_str := "end";
-        VAR string ack_str := "ACK";
-        
         errorMessage := "errorerror";
         
-        ListenForAndAcceptConnection;
         
+        ListenForAndAcceptConnection client_socket, host, port;
         
-        ! Receive a string from the client.
-        SocketReceive client_socket \Str:=received_str;
-            
-        messageArray{count} := received_str;
-        SocketSend client_socket \Str:=(ack_str+"\0A");
-        count := count + 1;
-        !WaitTime 0.001;
-        WHILE (received_str <> (end_str+"\0A")) DO
-            SocketReceive client_socket \Str:=received_str;
-            messageArray{count} := received_str;
-            IF count MOD 2 = 1 THEN
-                SocketSend client_socket \Str:=(ack_str+"\0A");
-            ELSE
-                sendError errorMessage;
-            ENDIF
-            count := count+1;
-            !WaitTime 0.001;
-        ENDWHILE
+        receiveMessage client_socket, messageArray;
         
-        IF messageArray{1} = "0\0A" THEN
-            
-        ELSEIF messageArray{1} = "1\0A" THEN
-            str2BlockTraj messageArray, blockArray, leftOverArray, numBlocks, numLeftOver;
-        ELSEIF messageArray{1} = "2\0A" THEN
-            str2LetterTraj messageArray, letterArray, numLetters, numCoordinates;
-        ENDIF
+        parseString messageArray, blockArray, leftOverArray, numBlocks, numLeftOver, letterArray, numLetters, numCoordinates;
+       
+        sendError client_socket, errorMessage;
+        
         ! Send the string back to the client, adding a line feed character.
         ! SocketSend client_socket \Str:=(received_str + "\0A");
 
-        CloseConnection;
+        CloseConnection client_socket;
 		
     ENDPROC
 
-    PROC ListenForAndAcceptConnection()
+    PROC ListenForAndAcceptConnection(VAR socketdev client_socket, string host, num port)
         
         ! Create the socket to listen for a connection on.
         VAR socketdev welcome_socket;
@@ -103,13 +77,51 @@ MODULE MTRN4230_Server_Sample1
     ENDPROC
     
     ! Close the connection to the client.
-    PROC CloseConnection()
+    PROC CloseConnection(VAR socketdev client_socket)
         SocketClose client_socket;
     ENDPROC
     
-    PROC sendError(string errorMessage)
+    PROC receiveMessage(VAR socketdev client_socket, VAR string messageArray{*})
+        
+        VAR string received_str;
+        VAR num count := 1;
+        VAR string end_str := "end";
+        VAR string ack_str := "ACK";
+        
+        !errorMessage := "errorerror";
+        
+        ! Receive a string from the client.
+        SocketReceive client_socket \Str:=received_str;
+            
+        messageArray{count} := received_str;
+        SocketSend client_socket \Str:=(ack_str+"\0A");
+        count := count + 1;
+        WHILE (received_str <> (end_str+"\0A")) DO
+            SocketReceive client_socket \Str:=received_str;
+            messageArray{count} := received_str;
+            SocketSend client_socket \Str:=(ack_str+"\0A");
+!            !IF count MOD 2 = 1 THEN
+!               SocketSend client_socket \Str:=(ack_str+"\0A");
+!            ELSE
+!                sendError errorMessage;
+!            ENDIF
+            count := count+1;
+        ENDWHILE
+    ENDPROC
+    
+    PROC sendError(VAR socketdev client_socket, string errorMessage)
         SocketSend client_socket \Str:=("0, "+errorMessage+"\0A");
         
+    ENDPROC
+    
+    PROC parseString(VAR string messageArray{*}, VAR num blockArray{*,*}, VAR num leftOverArray{*,*}, VAR num numBlocks, VAR num numLeftOver, VAR num letterArray{*,*,*}, VAR num numLetters, VAR num numCoordinates{*})
+        IF messageArray{1} = "0\0A" THEN
+            
+        ELSEIF messageArray{1} = "1\0A" THEN
+            str2BlockTraj messageArray, blockArray, leftOverArray, numBlocks, numLeftOver;
+        ELSEIF messageArray{1} = "2\0A" THEN
+            str2LetterTraj messageArray, letterArray, numLetters, numCoordinates;
+        ENDIF
     ENDPROC
     
     PROC str2LetterTraj(string messageArray{*}, VAR num letterArray{*,*,*}, VAR num numLetters, VAR num numCoordinates{*})
@@ -217,7 +229,7 @@ MODULE MTRN4230_Server_Sample1
 !            !y coordinate of leftover block
 !            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,2});
 !            posInStr := posInStr + 1;
-!            !y coordinate of leftover block
+!            !z coordinate of leftover block
 !            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,3});
 !            posInStr := posInStr + 1;
 !            !x coordinate of junk area
@@ -226,7 +238,7 @@ MODULE MTRN4230_Server_Sample1
 !            !y coordinate of junk area
 !            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,5});
 !            posInStr := posInStr + 1;
-!            !y coordinate of junk area
+!            !z coordinate of junk area
 !            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,6});
 !            posInStr := posInStr + 1;
 !            count := count + 1;
