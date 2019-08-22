@@ -1,12 +1,12 @@
-!Decoration Movement Code for Robot
+!Decoration Movement Code for Robot written by Dylan Dam z5115759
 
 MODULE DecorationFinal
-    CONST robtarget EndPoint:=[[520,0,145],[0,0,1,0],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    ! Custom waypoints that I have selected
     CONST robtarget ImmediatePoint1:=[[430,125,450],[0,0,1,0],[0,-1,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
     CONST robtarget ImmediatePoint2:=[[265,165,450],[0,0,1,0],[0,-1,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
     CONST robtarget ImmediatePoint3:=[[0,409,450],[0,0,1,0],[1,-1,1,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
-    CONST robtarget StartPoint:=[[20,409,24],[0,0,-1,0],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
     CONST robtarget MoveToHome:=[[410,0,450],[0,0,-1,0],[0,0,-1,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    ! Offset for the end-effector
     CONST num offSet := 12;
     !Dummy Array for Testing
     CONST num qwirkleArray{3,7} := [[20,409,24,520,0,150,45],[20,409,24,500,0,150,0],[20,409,24,450,0,150,45]];
