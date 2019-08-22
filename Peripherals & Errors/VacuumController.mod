@@ -8,30 +8,20 @@ MODULE VacuumController
     !   This is a module containing all vacuum commands to be called by other modules
     !
     !***********************************************************
-
-    VAR clock clk;
-    VAR num time;
+    
     VAR num vacResp;
     VAR errnum SUCTION_CUP_ERR;
-
-    !***********************************************************
-    !
-    ! Procedure main
-    !
-    !   This is the entry point of your program
-    !
-    !***********************************************************
-
+    VAR intnum timerInt;
 
     PROC turnOnVacuum()
         SetDO DO10_1,1;
-        ClkStart clk;
+        IWatch timerInt;
     ENDPROC
 
     PROC turnOffVacuum()
+        ISleep timerInt;
         turnOffGripper;
         SetDO DO10_1,0;
-        ClkReset clk;
     ENDPROC
 
     PROC turnOnGripper()
@@ -47,10 +37,11 @@ MODULE VacuumController
         SetDO DO10_2,0;
     ENDPROC
 
-    PROC checkTime()
-        time:=ClkRead(clk);
-        IF time>10 THEN
-            turnOffVacuum;
-        ENDIF
-    ENDPROC
+    TRAP checkTime
+        TPErase;
+        TPWrite "Vacuum was on for too long...";
+        TPWrite "Turning off...";
+        turnOffVacuum;
+        RETURN;
+    ENDTRAP 
 ENDMODULE
