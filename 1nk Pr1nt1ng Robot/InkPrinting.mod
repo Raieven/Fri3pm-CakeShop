@@ -1,3 +1,10 @@
+!Name: Int Printing Robot
+!Author Name: Mike Ni
+!ZID: Z5083683
+!Description: 
+!input a 3xnxm matrix data, recevied from GUI part, see GUI for more info
+!runs program to move TCP along a given trajectory with a given speed dicided by boldness of letter
+!
 MODULE InkPrinting
     !use "draw_letter data_matrix" to run
     PROC draw_letter(num data_matrix{*,*,*})
@@ -15,6 +22,8 @@ MODULE InkPrinting
         VAR num time_req;
         VAR num bolded;
         VAR speeddata speed;
+        
+        !for each letter
         FOR index FROM 1 TO DIM(data_matrix, 2) DO
             bolded := data_matrix{1,index,1};
             IF bolded = 0 THEN
@@ -22,6 +31,7 @@ MODULE InkPrinting
             ELSE
                 speed := [100, 500, 5000, 1000];
             ENDIF
+            !for each point on trajectory
             FOR i FROM 1 TO DIM(data_matrix,1) DO
                 x := data_matrix{2,index,i};
                 y := data_matrix{3,index,i};
@@ -38,6 +48,7 @@ MODULE InkPrinting
                 curr := [x, y, z];
                 next := [x_next, y_next, z];
                 distance_from_next := Distance(curr, next);
+                
                 ! find previous point, start from i = 2
                 IF i > 1 THEN
                     prev := [data_matrix{2,index-1,i}, data_matrix{3,index-1,i}, z];
