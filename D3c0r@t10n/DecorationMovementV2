@@ -44,7 +44,8 @@ MODULE DecorationFinal
 
             PathToConvFromHome;
             MoveL qwirkleLocation,v1000,z100,tool0\WObj:=wobj0;
-            ! Vacuum on
+            turnOnVacuum;
+            turnOnGripper;
             ResetConveyorPath;
             PathToHomeFromConv;
             MoveL qwirklePlacement,v1000,z100,tool0\WObj:=wobj0;
@@ -68,7 +69,6 @@ MODULE DecorationFinal
         MoveL ImmediatePoint3,v1000,z100,tool0\WObj:=wobj0;
         MoveL ImmediatePoint2,v1000,z100,tool0\WObj:=wobj0;
         MoveL ImmediatePoint1,v1000,z100,tool0\WObj:=wobj0;
-        ! Lawrence's Robtarget of Qwirkle Position on the table (orientation of qwirkle is not handled yet)
     ENDPROC
     PROC ResetConveyorPath()
         MoveL ImmediatePoint3,v1000,z100,tool0\WObj:=wobj0;
@@ -86,7 +86,8 @@ MODULE DecorationFinal
     PROC RotateTool(num Orientation,robtarget a)
         MoveL RelTool(a,0,0,0,\Rz:= Orientation),v1000,fine,tool0\WObj:=wobj0;
         WaitTime 2;
-        !Vacuum Off
+        turnOffGripper;
+        turnOffVacuum;
         WaitTime 1;
         
     ENDPROC
