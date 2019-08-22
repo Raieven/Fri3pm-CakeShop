@@ -31,6 +31,8 @@ function [decor] = Decoration()
     
     % do your setup stuff here
     decor.private = 'private variable\n';
+    global private2;
+    private2 = 42;
     
     function [from, to, angle] = update(table, conveyor)
         [from, to, angle] = your_decoration_function(decor, table, conveyor);
