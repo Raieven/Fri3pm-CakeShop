@@ -1,6 +1,9 @@
-function networksend(data, data2,messagetype)
-t = tcpip('localhost', 20000, 'NetworkRole', 'client');
-t.OutputBufferSize = 1000000;
+
+
+
+function networksend(tcpObject, data, data2,messagetype)
+%t = tcpip('localhost', 20000, 'NetworkRole', 'client');
+%t.OutputBufferSize = 1000000;
 endmessage = 'end';
 if (messagetype == 2)
     m = letterTraj2Str(data);
@@ -13,25 +16,25 @@ end
 
 sizeOfStrArr = size(m,2);
     
-fopen(t);
+%fopen(t);
 count = 0;
 for i = 1:sizeOfStrArr
     ack = '';
-    fprintf(t, m(i));
-    while (t.BytesAvailable == 0)
+    fprintf(tcpObject, m(i));
+    while (tcpObject.BytesAvailable == 0)
         %wait for ack
     end
-    ack = fscanf(t);
+    ack = fscanf(tcpObject);
     if (contains(ack, "ACK"))
         %string was received
     elseif (ack(1) == '0')
-        count = count+1;
-        
+        %count = count+1;
+        %string was not received
     end
 end
-fprintf(t, endmessage);
+fprintf(tcpObject, endmessage);     %end the transmission
 
-fclose(t);
+%fclose(t);
 
 end
 

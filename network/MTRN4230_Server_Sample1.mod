@@ -22,6 +22,13 @@ MODULE MTRN4230_Server_Sample1
     VAR bool errorFlag;
     VAR string errorMessage;
     
+    VAR num numLetters;
+    VAR num numCoordinates{100};
+    
+    VAR num numBlocks;
+    VAR num numLeftOver;
+        
+    
     
     PROC Main ()
         
@@ -61,8 +68,13 @@ MODULE MTRN4230_Server_Sample1
             !WaitTime 0.001;
         ENDWHILE
         
-        str2BlockTraj messageArray, blockArray, leftOverArray;
-        !str2LetterTraj messageArray, letterArray;
+        IF messageArray{1} = "0\0A" THEN
+            
+        ELSEIF messageArray{1} = "1\0A" THEN
+            str2BlockTraj messageArray, blockArray, leftOverArray, numBlocks, numLeftOver;
+        ELSEIF messageArray{1} = "2\0A" THEN
+            str2LetterTraj messageArray, letterArray, numLetters, numCoordinates;
+        ENDIF
         ! Send the string back to the client, adding a line feed character.
         ! SocketSend client_socket \Str:=(received_str + "\0A");
 
@@ -100,9 +112,9 @@ MODULE MTRN4230_Server_Sample1
         
     ENDPROC
     
-    PROC str2LetterTraj(string messageArray{*}, VAR num letterArray{*,*,*})
-        VAR num numLetters;
-        VAR num numCoordinates{100};
+    PROC str2LetterTraj(string messageArray{*}, VAR num letterArray{*,*,*}, VAR num numLetters, VAR num numCoordinates{*})
+        !VAR num numLetters;
+        !VAR num numCoordinates{100};
         VAR bool convertStatus;
         !VAR num count;
         !VAR num count2;
@@ -147,9 +159,9 @@ MODULE MTRN4230_Server_Sample1
     
     
     ! convert array of strings to block locations
-    PROC str2BlockTraj(string messageArray{*}, VAR num blockArray{*,*}, VAR num leftOverArray{*,*})
-        VAR num numBlocks;
-        VAR num numLeftOver;
+    PROC str2BlockTraj(string messageArray{*}, VAR num blockArray{*,*}, VAR num leftOverArray{*,*}, VAR num numBlocks, VAR num numLeftOver)
+        !VAR num numBlocks;
+        !VAR num numLeftOver;
         VAR bool convertStatus;
         !VAR num count;
         VAR num posInStr;
