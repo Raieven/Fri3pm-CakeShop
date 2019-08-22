@@ -1,12 +1,17 @@
 % Author: WENJIE MAO
 % ID: z5097983
-% Date: 19/08/2019
+% Date: 22/08/2019
 % MTRN4230 Group Assignment
 % Computer Vision program for ink printing 
 
 close all;clear;clc;
-colorImage = imread('1600x1200_2.png');
+MTRN4230_image_capture();
+pause;
+colorImage = imread('text.png');
 I = rgb2gray(colorImage);
+% figure;
+% imshow(colorImage);
+% title("Original Image");
 
 % Binarize the image
 BWImage = ~imbinarize(I);
@@ -23,9 +28,9 @@ BWImage = bwpropfilt(BWImage,'MinorAxisLength',[5,150]);
 BWImage = bwpropfilt(BWImage,'Solidity',[0.2,1]);
 BWImage = bwpropfilt(BWImage,'Extent',[0.2,1]);
 
-figure;
-imshow(BWImage);
-title("Binarized Image");
+% figure;
+% imshow(BWImage);
+% title("Binarized Image");
 
 % --------------- Check boldness --------------------%
 
@@ -72,8 +77,8 @@ end
 % ------------ Create via points ------------------- %
 
 Text001 = bwmorph(BWImage, 'thin', inf);
-figure
-imshow(Text001)
+% figure
+% imshow(Text001)
 Text_Im = regionprops(Text001, 'BoundingBox', 'Image', 'Centroid');
 coords_T = vertcat(Text_Im.Centroid);  % 2-by-18 matrix of centroid data
 Centroid_Original = coords_T;
@@ -173,7 +178,8 @@ fy = load('f_y.mat');
 f_y = fy.p_y;
 Traj = {};
 
-figure;
+fig = figure;
+ax = axes;
 imshow(I);
 title('Final');
 hold on;
@@ -217,13 +223,13 @@ for i = 1:length(Draw)
     % Simulate the trajectory
     for ii = 1:length(RR)
         drawnow
-        plot(RR(ii),CC(ii), style, 'Markersize', Boldness);
+        plot(ax, RR(ii),CC(ii), style, 'Markersize', Boldness);
         pause(0.02)
     end
     
     % Convert into world coordinates
-    WP_X = (f_x(1)*CC + f_x(2))/1000;
-    WP_Y = -(f_y(1)*RR + f_y(2))/1000;
+    WP_X = (f_x(1)*CC + f_x(2));
+    WP_Y = -(f_y(1)*RR + f_y(2));
     
     Traj{1,i} = Draw{1,i};
     Traj{2,i} = [WP_X, WP_Y];
@@ -240,4 +246,34 @@ function [Off_R, Off_C] = FindNext(Curr_Mx)
     [Off_R, Off_C] = find(and(Curr_Mx, Cmp_Mx));
     Off_R = 2 - Off_R;
     Off_C = 2 - Off_C;
+end
+
+% Image Acquisition from table camera
+function MTRN4230_image_capture (varargin)
+    close all;
+    warning('off', 'images:initSize:adjustingMag');
+
+    if nargin == 0 || nargin == 1
+        fig1 =figure(1);
+        axe1 = axes ();
+        axe1.Parent = fig1;
+        vid1 = videoinput('winvideo', 1, 'MJPG_1600x1200');
+        video_resolution1 = vid1.VideoResolution;
+        nbands1 = vid1.NumberOfBands;
+        img1 = imshow(zeros([video_resolution1(2), video_resolution1(1), nbands1]), 'Parent', axe1);
+        prev1 = preview(vid1,img1);
+        src1 = getselectedsource(vid1);
+        src1.ExposureMode = 'manual';
+        src1.Exposure = -4;
+        cam1_capture_func = @(~,~)capture_image(vid1,'table_img');
+        prev1.ButtonDownFcn = cam1_capture_func;
+        fig1.KeyPressFcn = cam1_capture_func;
+    end
+end
+
+% Image capture function  
+function capture_image (vid,name)
+    snapshot = getsnapshot(vid);
+    close;
+    imwrite(snapshot1,'text.png');
 end
