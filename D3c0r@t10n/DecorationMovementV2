@@ -1,4 +1,7 @@
-!Decoration Movement Code for Robot written by Dylan Dam z5115759
+!***************************************************************
+!Decoration Movement Code for Robot 
+! Author: Dylan Dam z5115759
+!***************************************************************
 
 MODULE DecorationFinal
     ! Custom waypoints that I have selected
