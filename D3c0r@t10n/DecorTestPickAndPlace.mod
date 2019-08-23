@@ -6,11 +6,18 @@ MODULE DecorTestPickAndPlace
     !
     ! Description: 
     !    This module is responsible for testing the pick and place for the qwirkle decoration.
+    ! 
+    ! Input: Array of coordinates from Computer Vision 
+    ! Output: 
+    !   Arm should move from: 
+    !       - Conveyor Home to T1 and rotate end effector by +45 degrees.
+    !       - Conveyor Home to T2 and not rotate the end-effector
+    !       - Conveyor Home to T3 and rotate end effector by -45 degrres;
     !
     !***********************************************************
     
     ! Dummy Array for Testing
-    CONST num qwirkleArray{3,7}:=[[20,409,24,520,0,150,45],[20,409,24,500,0,150,0],[20,409,24,450,0,150,45]];
+    CONST num qwirkleArray{3,7}:=[[0,409,36,175,0,165,45],[0,409,36,175,-520,165,0],[0,409,36,175,520,165,-45]];
 
     PROC DecorTest()
         DecorateMain qwirkleArray;
