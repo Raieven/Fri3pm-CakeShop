@@ -70,6 +70,9 @@ MODULE CakeShopServer
     
     ! Flag to pause and resume robot operations, TRUE will indicate operations are resumed, FALSE will pause the robot
     PERS bool pauseResume:= TRUE;
+    
+    !Flag to stop  the robot completely, TRUE will stop the robot
+    PERS bool stopFlag:= FALSE;
 
 
     PROC Main()
@@ -213,6 +216,9 @@ MODULE CakeShopServer
             ELSE
                 pauseResume := TRUE;
             ENDIF
+        ELSEIF messageArray{1} = "5\0A" THEN
+            stopFlag := TRUE;
+        
         ENDIF
     ENDPROC
 
