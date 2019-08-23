@@ -67,6 +67,9 @@ MODULE CakeShopServer
 
     ! Flag to determine if more information will be received
     PERS bool robotMoving:=TRUE;
+    
+    ! Flag to pause and resume robot operations, TRUE will indicate operations are resumed, FALSE will pause the robot
+    PERS bool pauseResume:= TRUE;
 
 
     PROC Main()
@@ -204,6 +207,12 @@ MODULE CakeShopServer
             numLettersCopy:=numLetters;
             numCoordinatesCopy:=numCoordinates;
             letters:=TRUE;
+        ELSEIF messageArray{1}="4\0A" THEN
+            IF pauseResume = TRUE THEN
+                pauseResume := FALSE;
+            ELSE
+                pauseResume := TRUE;
+            ENDIF
         ENDIF
     ENDPROC
 
