@@ -13,7 +13,7 @@
 %
 %       call vision code with
 %   >> Image = imread('path/to.jpg');
-%   >> [letters, Traj] = IP.update(Image);
+%   >> [letters, Traj, Draw] = IP.update(Image);
 %
 %  Input: 
 %   Image - Image taken from table camera
@@ -21,15 +21,15 @@
 %
 %  Output:
 %   Traj - Boldness & XY coordinates
-%   i = 1;         - For the 1st letter in the text
-%   Traj{2,i}(:,1) - X coordinates of the 1st letter
-%   Traj{2,i}(:,2) - Y coordinates of the 1st letter
-%   Traj{1,i}      - Boldness of the 1st letter
+%   Traj{2,i}(:,1) - X coordinates of the i-th letter
+%   Traj{2,i}(:,2) - Y coordinates of the i-th letter
+%   Traj{1,i}      - Boldness of the i-th letter
 %
 %   letters(i).boldness         - boldness of the i-th letter
 %   letters(i).trajectory(:,1)  - X coords of the i-th letter
 %   letters(i).trajectory(:,2)  - Y coords of the i-th letter
-
+%
+%   Draw - to simulate trajectory in MATLAB
 
 function [IP_copy] = InkPrinting()
     % Load calibration parameter to convert coordinates into world coordinates
@@ -44,7 +44,7 @@ function [IP_copy] = InkPrinting()
     IP_copy = IP;
 end
 
-function [letters, Traj] = InkPrinting_run(Image)
+function [letters, Traj, Draw] = InkPrinting_run(Image)
 %close all;clear;clc;
 % MTRN4230_image_capture();
 % pause;
@@ -263,8 +263,8 @@ for i = 1:length(Draw)
 %     end
     
     % Convert into world coordinates
-    WP_X = (f_x(1)*CC + f_x(2));
-    WP_Y = -(f_y(1)*RR + f_y(2));
+    WP_X = (f_x.p_x(1)*CC + f_x.p_x(2));
+    WP_Y = -(f_y.p_y(1)*RR + f_y.p_y(2));
     
     Traj{1,i} = Draw{1,i};
     Traj{2,i} = [WP_X, WP_Y];
@@ -282,13 +282,59 @@ end
 
 function InkPrinting_unit_test(~,~)
 
-    img = imload('9.jpg');
+    img = imread('10.png');
+
+    [~, ~, Draw] = InkPrinting_run(img);
     
-    [t, traj] = InkPrinting_run(img);
-    
-    plot(traj, traj, '*');
-    
-    % place test code here
+    fig = figure;
+    ax = axes;
+    imshow(img);
+    title('Simulation');
+    hold on;
+    for i = 1:length(Draw)
+        % Red thicker line for Bold font, green thin line for normal font
+        if Draw{1,i} == 1
+           Boldness = 20;
+           style = 'r.';
+        else
+           Boldness = 10;
+           style = 'g.';
+        end
+
+        Tj = Draw{2,i};
+        Idx_clr = [];
+        n = 1;
+        Flag_clr = 0;
+        CC = Tj(:,1);
+        RR = Tj(:,2);
+
+        % Simplify the trajectory by reducing the way points
+        for m = 1:(length(CC)-1)
+            if Flag_clr == 0
+                cm = m;
+            end
+
+            if (sqrt((CC(cm) - CC(m+1))^2 + (RR(cm) - RR(m+1))^2) <= 10)
+                Idx_clr(n) = m+1;
+                n = n + 1;
+                Flag_clr = 1;
+            else
+                Flag_clr = 0;
+            end
+
+        end
+
+        CC(Idx_clr) = [];
+        RR(Idx_clr) = [];
+
+        % Simulate the trajectory
+        for ii = 1:length(RR)
+            drawnow
+            plot(ax, RR(ii),CC(ii), style, 'Markersize', Boldness);
+            pause(0.02)
+        end
+
+    end
     fprintf('ink test complete\n');
 end
 
