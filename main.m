@@ -8,22 +8,22 @@ function main()
     table_camera_parameters = set_camera_parameters(table_camera_source, []);
     table_camera_parameters(1) = -4;
     set_camera_parameters(table_camera_source, table_camera_parameters);
-    default_table_image = imread('3.jpg');
+    default_table_image = imread('default_table.jpg');
     
     % setup conveyor camera
     [conveyor_camera, conveyor_camera_source] = connect_to_camera(2);
     conveyor_camera_parameters = set_camera_parameters(conveyor_camera_source, []);
     conveyor_camera_parameters(1) = -6;
     set_camera_parameters(conveyor_camera_source, conveyor_camera_parameters);
-    default_conveyor_image = imread('7.jpg');
+    default_conveyor_image = imread('default_conveyor.jpg');
     
     % set up TCP, ink and decoration objects
     global TcpIp ink decoration;
-    TcpIp = TCP;
+    TcpIp = TCP();
     ink = InkPrinting;
     decoration = Decoration;
     
-    TcpIp.open('192.168.0.1', 5000);
+    TcpIp.open('127.0.0.1', 20000);
 
     % create main figure
     main_window = figure;
