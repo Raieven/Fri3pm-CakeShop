@@ -1,3 +1,16 @@
+% name: blockTraj2Str
+% author: Lawrence Wang, z5075019
+%
+% Description: This is a routine to turn block data into a message
+%
+% usage: m = blockTraj2Str(blockOrder,leftOverBlocks)
+%
+% inputs: 
+%   blockOrder -  the x,y,z coordinates of blocks
+%   leftOverBlocks - the x,y,z coordinates of leftover blocks
+%
+% Outputs:
+%   m - an array of strings which contains the message
 function m = blockTraj2Str(blockOrder,leftOverBlocks)
     s = size(blockOrder);
     s1 = size(leftOverBlocks);

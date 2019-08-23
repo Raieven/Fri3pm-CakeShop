@@ -1,3 +1,15 @@
+% name: letterTraj2Str
+% author: Lawrence Wang, z5075019
+%
+% Description: This is a routine to turn letter data into a message
+%
+% usage: m = letterTraj2Str(Traj)
+%
+% inputs: 
+%   Traj - the x,y coordinates of letter trajectories
+%
+% Outputs:
+%   m - an array of strings which contains the message
 function m = letterTraj2Str(Traj)
     s = size(Traj);
     posStringArray = 1;

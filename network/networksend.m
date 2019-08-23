@@ -1,4 +1,24 @@
-
+% name: networksend 
+% author: Lawrence Wang, z5075019
+%
+% Description: This is a routine to send messages over tcp/ip
+%
+% usage: networksend(tcpObject, data, data2,messagetype)
+%
+% inputs: 
+%   tcpObject - a tcpip object which you want to send data to
+%   data - for messagetype 1, a blockOrder, the x,y,z coordinates of blocks
+%          for messagetype 2, a Traj, the x,y coordinates of letter
+%          trajectories
+%   data2 - for message type 1, a leftOverBlocks, the x,y,z coordinates of
+%           leftover blocks
+%           for message type 2, unused
+%   messagetype - describes what type of message is being sent. 0 for
+%                 error message, 1 for block trajectories, 2 for letter
+%                 trajectories
+%
+% Outputs:
+%   none
 
 
 function networksend(tcpObject, data, data2,messagetype)
