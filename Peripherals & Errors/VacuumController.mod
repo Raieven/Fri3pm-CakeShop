@@ -1,7 +1,7 @@
 MODULE VacuumController
     !***********************************************************
     !
-    ! Module:  Vacuum Controller
+    ! Module: Vacuum Controller
     ! Author: Rachel Feng, z5112668
     !
     ! Description:
@@ -9,8 +9,11 @@ MODULE VacuumController
     !
     !***********************************************************
     
+    ! Response from error provided by the user
     VAR num vacResp;
+    ! Error number for suction cup fail
     VAR errnum SUCTION_CUP_ERR;
+    ! Timer interrupt
     VAR intnum timerInt;
 
     PROC turnOnVacuum()

@@ -1,14 +1,17 @@
 MODULE ConveyorController
     !***********************************************************
     !
-    ! Module:  Conveyor Controller
+    ! Module: Conveyor Controller
     ! Author: Rachel Feng, z5112668
     !
     ! Description:
     !   This is a module containing all conveyor commands to be called by other modules
     !
     !***********************************************************
+    
+    ! Response from error provided from the user
     VAR num convResp;
+    ! Error number for conveyor movement fail
     VAR errnum CONV_MOVE_ERR;
 
     PROC turnOnConveyor()
