@@ -17,7 +17,7 @@ MODULE DecorTestPickAndPlace
     !***********************************************************
     
     ! Dummy Array for Testing
-    CONST num qwirkleArray{3,7}:=[[0,409,36,175,0,165,45],[0,409,36,175,-520,165,0],[0,409,36,175,520,165,-45]];
+    CONST num qwirkleArray{3,7}:=[[0,409,36,175,0,150,45],[0,409,36,175,-520,150,0],[0,409,36,175,520,150,-45]];
 
     PROC DecorTest()
         DecorateMain qwirkleArray;
