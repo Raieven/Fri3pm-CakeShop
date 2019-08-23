@@ -71,9 +71,15 @@ MODULE CakeShopServer
     ! Flag to pause and resume robot operations, TRUE will indicate operations are resumed, FALSE will pause the robot
     PERS bool pauseResume:= TRUE;
     
-    !Flag to stop  the robot completely, TRUE will stop the robot
+    ! Flag to stop  the robot completely, TRUE will stop the robot
     PERS bool stopFlag:= FALSE;
     
+    ! Flags to send error message back to GUI
+    PERS bool lightCurtainError;
+    PERS bool emergencyStopError;
+    PERS bool conveyorError;
+    PERS bool vacuumError;
+    PERS bool clearMessage;
 
 
     PROC Main()
@@ -102,6 +108,23 @@ MODULE CakeShopServer
         IF robotMoving=FALSE THEN
             sendRobotUpdate client_socket,"Take another picture";
         ENDIF
+        
+        IF lightCurtainError=TRUE THEN
+            sendError client_socket,"Light Curtain Obstruction.\nPlease check Flex Pendant";
+        ENDIF   
+        IF emergencyStopError=TRUE THEN
+            sendError client_socket,"Emergency Stop occured.\nPlease check Flex Pendant";
+        ENDIF 
+        IF conveyorError=TRUE THEN
+            sendError client_socket,"Conveyor Error.\nPlease check Flex Pendant";
+        ENDIF 
+        IF vacuumError=TRUE THEN
+            sendError client_socket,"Vacuum Error.\nPlease check Flex Pendant";
+        ENDIF 
+        IF clearMessage=TRUE THEN
+            sendError client_socket,"";
+        ENDIF 
+        
 
         ! Send the string back to the client, adding a line feed character.
         ! SocketSend client_socket \Str:=(received_str + "\0A");

@@ -12,13 +12,20 @@ MODULE CakeShopRobotMain
     !   if decoration is completed.   
     !
     !***********************************************************
-    
+
     ! Interrupts for emergency stops
     VAR intnum lightCurtain;
     VAR intnum emergencyStop;
     VAR intnum emergencyStopMotor;
     VAR num tempConv;
     VAR num response;
+
+    ! Flags to send error message back to GUI
+    PERS bool lightCurtainError:=FALSE;
+    PERS bool emergencyStopError:=FALSE;
+    PERS bool conveyorError:=FALSE;
+    PERS bool vacuumError:=FALSE;
+    PERS bool clearMessage:=FALSE;
 
     ! Data received from server
     PERS num letterArrayCopy{3,100,1000};
@@ -37,6 +44,8 @@ MODULE CakeShopRobotMain
     PERS bool isDecorDone;
     PERS bool letters;
     PERS bool robotMoving;
+    PERS bool pauseResume;
+    PERS bool stopFlag;
 
     VAR bool firstConvMove:=FALSE;
 
@@ -53,6 +62,33 @@ MODULE CakeShopRobotMain
         ISignalDO\Single,DO_LIGHT_CURTAIN,0,lightCurtain;
         ISignalDO\Single,DO_ESTOP,1,emergencyStop;
         ISignalDO\Single,DO_ESTOP2,0,emergencyStopMotor;
+
+        ! stop all functions, return robot arm to home position
+        IF stopFlag=TRUE THEN
+            turnOffConveyor;
+            turnOffGripper;
+            turnOffVacuum;
+            MoveL MoveToHome,v1000,z100,tool0\WObj:=wobj0;
+            StopMove;
+            EXIT;
+        ENDIF
+
+        ! pause/resume loop
+        IF pauseResume=FALSE THEN
+            StopMove;
+            IF DOutput(DO10_3)=1 THEN
+                turnOffConveyor;
+                tempConv:=1;
+            ENDIF
+            WHILE pauseResume=FALSE DO
+                ! do nothing
+            ENDWHILE
+            IF tempConv=1 THEN
+                turnOnConveyor;
+                tempConv:=0;
+            ENDIF
+            StartMove;
+        ENDIF
 
         ! move conveyor for first choc block picture
         IF firstConvMove=FALSE THEN
@@ -91,6 +127,7 @@ MODULE CakeShopRobotMain
         ! Error routines
     ERROR
         IF ERRNO=SUCTION_CUP_ERR THEN
+            vacuumError:=TRUE;
             TPErase;
             TPReadFK vacResp,"Do you want to turn on vacuum?",stEmpty,stEmpty,stEmpty,"No","Yes";
             IF vacResp=4 THEN
@@ -100,14 +137,17 @@ MODULE CakeShopRobotMain
                 EXIT;
             ELSEIF vacResp=5 THEN
                 vacResp:=0;
+                clearMessage:=TRUE;
                 TPErase;
                 TPWrite "Turning on vacuum";
                 turnOnVacuum;
+                vacuumError:=FALSE;
                 RETRY;
             ENDIF
         ENDIF
 
         IF ERRNO=CONV_MOVE_ERR THEN
+            conveyorError:=TRUE;
             ! print to gui
             ! Write: Conveyor could not be started. 
             ! Write: Please check the following:\n - light curtain\n - conveyor guard\n Then please restart the conveyor from the control box
@@ -123,13 +163,17 @@ MODULE CakeShopRobotMain
                 EXIT;
             ELSEIF convResp=5 THEN
                 convResp:=0;
+                clearMessage:=TRUE;
                 TPErase;
                 TPWrite "Retrying...";
+                conveyorError:=FALSE;
                 RETRY;
             ENDIF
-            RETRY;
         ENDIF
     ENDPROC
+
+    ! pause/resume trap routine
+
 
     ! light curtain trap routine
     TRAP lTrap
@@ -139,6 +183,7 @@ MODULE CakeShopRobotMain
             turnOffConveyor;
             tempConv:=1;
         ENDIF
+        lightCurtainError:=TRUE;
         ! print message to gui
         ! Write: Please remove any obstructions and hazards from the robot including people.\nPlease reset the light curtain.
         ! get response from gui
@@ -147,18 +192,20 @@ MODULE CakeShopRobotMain
         TPReadFK response,"Please remove obstruction",stEmpty,stEmpty,stEmpty,"No","Fixed";
         IF response=4 THEN
             TPErase;
-            TPWrite "Exiting program";
-            WaitTime 5;
+            TPWrite "Exiting program...";
+            WaitTime 2;
             EXIT;
         ELSEIF response=5 THEN
             TPErase;
             TPWrite "Resuming...";
+            clearMessage:=TRUE;
         ENDIF
         StartMove;
         IF tempConv=1 THEN
             turnOnConveyor;
             tempConv:=0;
         ENDIF
+        lightCurtainError:=FALSE;
         RETURN ;
     ENDTRAP
 
@@ -170,16 +217,31 @@ MODULE CakeShopRobotMain
             turnOffConveyor;
             tempConv:=1;
         ENDIF
+        emergencyStopError:=TRUE;
         ! print message to gui
         ! Write: Please remove any obstructions and hazards from the robot including people.\nPlease reset the light curtain on your way out.
         ! get response from gui
         TPErase;
         TPWrite "Emergency stop!";
+        TPWrite "Please remove any obstructions and hazards from the robot.";
+        TPWrite "Don't forget to reset the light curtain.";
+        TPReadFK response,"Restart?",stEmpty,stEmpty,stEmpty,"No","Yes";
+        IF response=4 THEN
+            TPErase;
+            TPWrite "Exiting program...";
+            WaitTime 2;
+            EXIT;
+        ELSEIF response=5 THEN
+            TPErase;
+            TPWrite "Resuming...";
+            clearMessage:=TRUE;
+        ENDIF
         StartMove;
         IF tempConv=1 THEN
             turnOnConveyor;
             tempConv:=0;
         ENDIF
+        emergencyStopError:=FALSE;
         RETURN ;
     ENDTRAP
 
@@ -191,16 +253,31 @@ MODULE CakeShopRobotMain
             turnOffConveyor;
             tempConv:=1;
         ENDIF
+        emergencyStopError:=TRUE;
         ! print message to gui
         ! Write: Please remove all hazards. Please restart the motors.
         ! get response from gui
         TPErase;
         TPWrite "Motor stop!";
+        TPWrite "Please remove any obstructions and hazards from the robot.";
+        TPWrite "Don't forget to reset the light curtain.";
+        TPReadFK response,"Restart?",stEmpty,stEmpty,stEmpty,"No","Yes";
+        IF response=4 THEN
+            TPErase;
+            TPWrite "Exiting program...";
+            WaitTime 2;
+            EXIT;
+        ELSEIF response=5 THEN
+            TPErase;
+            TPWrite "Resuming...";
+            clearMessage:=TRUE;
+        ENDIF
         StartMove;
         IF tempConv=1 THEN
             turnOnConveyor;
             tempConv:=0;
         ENDIF
+        emergencyStopError:=FALSE;
         RETURN ;
     ENDTRAP
 
