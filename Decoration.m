@@ -26,25 +26,29 @@
 %   angle(i)    - the angle to turn i-th block on the table
 
 
-function [decor] = Decoration()
-    decor.update = @update;
-    
+function [Decor_copy] = Decoration()
     % do your setup stuff here
-    decor.private = 'private variable\n';
-    global private2;
-    private2 = 42;
+    global Decor;
+    Decor.private = 10;
+
     
-    function [from, to, angle] = update(table, conveyor)
-        [from, to, angle] = your_decoration_function(decor, table, conveyor);
-    end
+    Decor.update = @your_decoration_function;
+    Decor.test = @your_decoration_unit_test_function;
+    Decor_copy = Decor;
 end
 
-function [from, to, angle] = your_decoration_function(decor, table, conveyor)
-    fprintf(decor.private);
-    
+function [from, to, angle] = your_decoration_function(table, conveyor)
+    global Decor;
+
+    fprintf('%f\n', Decor.private);
+    Decor.private = Decor.private + 10;
     from = [0 0 0];
     to = [1 1 1];
     angle = [3.141/2];
+end
+
+function your_decoration_unit_test_function(~,~)
+    fprintf('decoration test complete\n');
 end
 
 % ----------------- Function ------------------ %
