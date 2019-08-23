@@ -264,7 +264,7 @@ for i = 1:length(Draw)
     
     % Convert into world coordinates
     WP_X = (f_x.p_x(1)*CC + f_x.p_x(2));
-    WP_Y = -(f_y.p_y(1)*RR + f_y.p_y(2));
+    WP_Y = (f_y.p_y(1)*RR + f_y.p_y(2));
     
     Traj{1,i} = Draw{1,i};
     Traj{2,i} = [WP_X, WP_Y];
