@@ -1,6 +1,6 @@
 % Author: WENJIE MAO
 % ID: z5097983
-% Date: 22/08/2019
+% Date: 23/08/2019
 % Description: Detect letters in the text and generate the trajectory.
 % MTRN4230 Group Assignment
 % Computer Vision program for ink printing 
@@ -68,9 +68,9 @@ Mask(250:850,500:1100) = 1;
 
 % Apply filters
 BWImage = BWImage & Mask;
-BWImage = bwareafilt(BWImage,[50,8000]);
-BWImage = bwpropfilt(BWImage,'MajorAxisLength',[50,150]);
-BWImage = bwpropfilt(BWImage,'MinorAxisLength',[5,150]);
+BWImage = bwareafilt(BWImage,[50,14000]);
+BWImage = bwpropfilt(BWImage,'MajorAxisLength',[70,250]);
+BWImage = bwpropfilt(BWImage,'MinorAxisLength',[5,250]);
 BWImage = bwpropfilt(BWImage,'Solidity',[0.2,1]);
 BWImage = bwpropfilt(BWImage,'Extent',[0.2,1]);
 
@@ -282,7 +282,7 @@ end
 
 function InkPrinting_unit_test(~,~)
 
-    img = imread('10.png');
+    img = imread('table__08_22_16_56_44.jpg');
 
     [~, ~, Draw] = InkPrinting_run(img);
     
