@@ -126,8 +126,11 @@ MODULE CakeShopRobotMain
 
         ! Error routines
     ERROR
+        ! Suction cup error: occurs when attempt to activate suction cup occured before vacuum pump activation
         IF ERRNO=SUCTION_CUP_ERR THEN
+            ! print message to gui
             vacuumError:=TRUE;
+            ! print message to flex pendant
             TPErase;
             TPReadFK vacResp,"Do you want to turn on vacuum?",stEmpty,stEmpty,stEmpty,"No","Yes";
             IF vacResp=4 THEN
@@ -146,13 +149,11 @@ MODULE CakeShopRobotMain
             ENDIF
         ENDIF
 
+        ! Conveyor error: occurs when attempt to turn on conveyor occured when IO/Light Curtain/Cage is not ready/set up
         IF ERRNO=CONV_MOVE_ERR THEN
-            conveyorError:=TRUE;
             ! print to gui
-            ! Write: Conveyor could not be started. 
-            ! Write: Please check the following:\n - light curtain\n - conveyor guard\n Then please restart the conveyor from the control box
-            ! read back from an ok button?
-            ! get response from gui: 
+            conveyorError:=TRUE;
+            ! print message to flex pendant
             TPErase;
             TPWrite "Please check light curtain and conveyor guard then restart conveyor";
             TPReadFK convResp,"Checked?",stEmpty,stEmpty,stEmpty,"No","Yes";
@@ -172,9 +173,6 @@ MODULE CakeShopRobotMain
         ENDIF
     ENDPROC
 
-    ! pause/resume trap routine
-
-
     ! light curtain trap routine
     TRAP lTrap
         ! stop the robot & conveyor
@@ -183,10 +181,9 @@ MODULE CakeShopRobotMain
             turnOffConveyor;
             tempConv:=1;
         ENDIF
-        lightCurtainError:=TRUE;
         ! print message to gui
-        ! Write: Please remove any obstructions and hazards from the robot including people.\nPlease reset the light curtain.
-        ! get response from gui
+        lightCurtainError:=TRUE;
+        ! print message to flex pendant
         TPErase;
         TPWrite "Light curtain obstruction";
         TPReadFK response,"Please remove obstruction",stEmpty,stEmpty,stEmpty,"No","Fixed";
@@ -217,10 +214,9 @@ MODULE CakeShopRobotMain
             turnOffConveyor;
             tempConv:=1;
         ENDIF
-        emergencyStopError:=TRUE;
         ! print message to gui
-        ! Write: Please remove any obstructions and hazards from the robot including people.\nPlease reset the light curtain on your way out.
-        ! get response from gui
+        emergencyStopError:=TRUE;
+        ! print message to flex pendant
         TPErase;
         TPWrite "Emergency stop!";
         TPWrite "Please remove any obstructions and hazards from the robot.";
@@ -245,18 +241,17 @@ MODULE CakeShopRobotMain
         RETURN ;
     ENDTRAP
 
+    ! emergency stop interrupt for motor button
     TRAP eTrapMotor
-        ! emergency stop interrupt for motor button
         ! stop the robot
         StopMove;
         IF DOutput(DO10_3)=1 THEN
             turnOffConveyor;
             tempConv:=1;
         ENDIF
-        emergencyStopError:=TRUE;
         ! print message to gui
-        ! Write: Please remove all hazards. Please restart the motors.
-        ! get response from gui
+        emergencyStopError:=TRUE;
+        ! print message to flex pendant
         TPErase;
         TPWrite "Motor stop!";
         TPWrite "Please remove any obstructions and hazards from the robot.";
