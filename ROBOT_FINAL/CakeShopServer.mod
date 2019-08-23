@@ -193,6 +193,12 @@ MODULE CakeShopServer
             !            ENDIF
             count:=count+1;
         ENDWHILE
+
+        ERROR
+            IF ERRNO=ERR_SOCK_CLOSED THEN
+                ListenForAndAcceptConnection client_socket,host,port;
+                RETRY;
+            ENDIF
     ENDPROC
 
     ! INPUT
