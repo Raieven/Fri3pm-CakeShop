@@ -31,23 +31,24 @@
 %   letters(i).trajectory(:,2)  - Y coords of the i-th letter
 
 
-function [IP] = InkPrinting()
-    IP.update = @update;
+function [IP_copy] = InkPrinting()
     % Load calibration parameter to convert coordinates into world coordinates
-    %fx = load('f_x.mat');
-    IP.f_x = [ 1 1 ];
-    %fy = load('f_y.mat');
-    IP.f_y = [ 1 1 ];
+    global IP;
+    fx = load('f_x.mat');
+    IP.f_x = fx;
+    fy = load('f_y.mat');
+    IP.f_y = fy;
     
-    function [letters, Traj] = update(Image)
-        [letters, Traj] = InkPrinting_Vision_V2_1(IP, Image);
-    end
+    IP.update = @InkPrinting_run;
+    IP.test = @InkPrinting_unit_test;
+    IP_copy = IP;
 end
 
-function [letters, Traj] = InkPrinting_Vision_V2_1(IP, Image)
+function [letters, Traj] = InkPrinting_run(Image)
 %close all;clear;clc;
 % MTRN4230_image_capture();
 % pause;
+global IP;
 f_x = IP.f_x;
 f_y = IP.f_y;
 
@@ -277,6 +278,18 @@ for i = 1:length(boldness)
     letters(i).boldness = boldness(i);
 end
 
+end
+
+function InkPrinting_unit_test(~,~)
+
+    img = imload('9.jpg');
+    
+    [t, traj] = InkPrinting_run(img);
+    
+    plot(traj, traj, '*');
+    
+    % place test code here
+    fprintf('ink test complete\n');
 end
 
 % ----------------- Function ------------------ %
