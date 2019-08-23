@@ -1,18 +1,26 @@
 MODULE CakeShopRobotMain
     !***********************************************************
     !
-    ! Module:  Main robot controller
+    ! Module: Main robot controller
+    ! Author: Rachel Feng, z5112668
     ! 
     ! Description:
-    !   This module is the main controller of all robot movements
+    !   This module is the main controller of all robot movements.
+    !   Contains ongoing error checking.
+    !   Calls functions to decorate the cake with blocks & icing.
+    !   After each pick and place, communicate back to server to see
+    !   if decoration is completed.   
     !
     !***********************************************************
+    
+    ! Interrupts for emergency stops
     VAR intnum lightCurtain;
     VAR intnum emergencyStop;
     VAR intnum emergencyStopMotor;
     VAR num tempConv;
     VAR num response;
 
+    ! Data received from server
     PERS num letterArrayCopy{3,100,1000};
     PERS num blockArrayCopy{50,7};
     PERS num leftOverArrayCopy{50,6};
@@ -24,6 +32,7 @@ MODULE CakeShopRobotMain
     PERS num numBlocksCopy;
     PERS num numLeftOverCopy;
 
+    ! Flags to check
     PERS bool chocBlocks;
     PERS bool isDecorDone;
     PERS bool letters;
