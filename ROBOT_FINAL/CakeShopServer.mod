@@ -73,11 +73,16 @@ MODULE CakeShopServer
     
     !Flag to stop  the robot completely, TRUE will stop the robot
     PERS bool stopFlag:= FALSE;
+    
 
 
     PROC Main()
         host:="127.0.0.1";
-        MainServer;
+        ListenForAndAcceptConnection client_socket,host,port;
+        WHILE stopFlag = FALSE DO
+            MainServer;
+        ENDWHILE
+        CloseConnection client_socket;
     ENDPROC
 
     ! Example of how the functions might be called. Normally start with ListenForAndAcceptConnection to open the socket, 
@@ -86,7 +91,7 @@ MODULE CakeShopServer
     PROC MainServer()
         errorMessage:="errorerror";
 
-        ListenForAndAcceptConnection client_socket,host,port;
+        !ListenForAndAcceptConnection client_socket,host,port;
 
         receiveMessage client_socket,messageArray;
 
@@ -101,7 +106,7 @@ MODULE CakeShopServer
         ! Send the string back to the client, adding a line feed character.
         ! SocketSend client_socket \Str:=(received_str + "\0A");
 
-        CloseConnection client_socket;
+        !CloseConnection client_socket;
     ENDPROC
 
     ! INPUT
