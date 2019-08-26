@@ -59,6 +59,11 @@ end
 function [messageString, messageType] = receive_message()
     global tcpip_internal;
 % recv error data from robot
+    if (tcpip_internal.bytesAvailable == 0)
+        messageString = 'nothing to read';
+        messageType = -1;
+        return;
+    end
     %str = [];
     message = fscanf(tcpip_internal);
     messageType = str2num(message(1));

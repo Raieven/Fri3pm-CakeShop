@@ -273,6 +273,10 @@ function ink_button_down(~,~)
     [~, b, ~] = ink.update(table_image);
     
     TcpIp.send_ink(b);
+    [messageString, messageType] = TcpIp.receive();
+    if (messageType == 0)
+        fprintf('%s\n', messageString);
+    end
 end
 
 function decoration_button_down(~,~)
@@ -283,5 +287,9 @@ function decoration_button_down(~,~)
     [a] = decoration.update(table_image, conveyor_image);
     
     TcpIp.send_decorations(a);
+    [messageString, messageType] = TcpIp.receive();
+    if (messageType == 0)
+        fprintf('%s\n', messageString);
+    end
 end
 
