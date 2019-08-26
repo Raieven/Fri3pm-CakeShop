@@ -95,7 +95,7 @@ MODULE CakeShopServer
     ! Do all the receiveMessage and sendError.
     ! When the program has finished then call CloseConnection to close the connection.
     PROC MainServer()
-        errorMessage:="errorerror";
+        !errorMessage:="errorerror";
 
         !ListenForAndAcceptConnection client_socket,host,port;
 
@@ -103,23 +103,23 @@ MODULE CakeShopServer
 
         parseString messageArray,blockArray,leftOverArray,numBlocks,numLeftOver,letterArray,numLetters,numCoordinates;
 
-        sendError client_socket,errorMessage;
+        !sendError client_socket,errorMessage;
 
         IF robotMoving=FALSE THEN
             sendRobotUpdate client_socket,"Take another picture";
         ENDIF
         
         IF lightCurtainError=TRUE THEN
-            sendError client_socket,"Light Curtain Obstruction.\nPlease check Flex Pendant";
+            sendError client_socket,"Light Curtain Obstruction.Please check Flex Pendant";
         ENDIF   
         IF emergencyStopError=TRUE THEN
-            sendError client_socket,"Emergency Stop occured.\nPlease check Flex Pendant";
+            sendError client_socket,"Emergency Stop occured.Please check Flex Pendant";
         ENDIF 
         IF conveyorError=TRUE THEN
-            sendError client_socket,"Conveyor Error.\nPlease check Flex Pendant";
+            sendError client_socket,"Conveyor Error.Please check Flex Pendant";
         ENDIF 
         IF vacuumError=TRUE THEN
-            sendError client_socket,"Vacuum Error.\nPlease check Flex Pendant";
+            sendError client_socket,"Vacuum Error.Please check Flex Pendant";
         ENDIF 
         IF clearMessage=TRUE THEN
             sendError client_socket,"";
