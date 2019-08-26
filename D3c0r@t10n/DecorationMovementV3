@@ -13,9 +13,10 @@ MODULE DecorationFinal
     CONST robtarget ImmediatePoint5:=[[430,-125,450],[0,0,1,0],[1,-1,1,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
     CONST robtarget MoveToHome:=[[410,0,450],[0,0,-1,0],[0,0,-1,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
     ! Offset for the end-effector
-    CONST num offSet := 125;
+    CONST num offSet := 75;
     !Dummy Array for Testing
-    CONST num qwirkleArray{4,7} := [[0,409,22,175,0,147,45],[0,409,22,548.6,0,147,0],[0,409,22,175,520,147,-45],[0,409,22,175,-520,147,-45]];
+    !CONST num qwirkleArray{4,7} := [[0,409,22.1,175,0,147,45],[0,409,22.1,548.6,0,147,0],[0,409,22.1,175,520,147,-45],[0,409,22.1,175,-300,147,-45]];
+    CONST num qwirkleArray{1,7} := [[0,409,22.1,175,-50,147,-89]];
     
     PROC Main()
         MoveL MoveToHome,v1000,z100,tool0\WObj:=wobj0;
@@ -37,24 +38,29 @@ MODULE DecorationFinal
         
         FOR a FROM 1 TO Dim(array,1) DO
             ! This part reads in the first line.
-            xStart := array{a,1};            
-            yStart := array{a,2};
-            zStart := array{a,3}+offSet;
-            xEnd := array{a,4};            
-            yEnd := array{a,5};
-            zEnd := array{a,6}+offSet;
+            xEnd := array{a,1};            
+            yEnd := array{a,2};
+            IF xEnd = 0 AND yEnd = 0 THEN
+                ExitCycle;
+            ENDIF
+            !zStart := array{a,3}+offSet;
+            zEnd := 147+offSet;
+            xStart := array{a,4};            
+            yStart := array{a,5};
+            zStart := 22.1+offSet;
             orientation := array{a,7};
             
-            qwirkleLocation := [[xStart,yStart,zStart],[0,0,1,0],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
-            qwirklePlacement :=[[xEnd,yEnd,zEnd],[0,0,1,0],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+            qwirklePlacement := [[xStart,yStart,zStart],[0,0,1,0],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+            qwirkleLocation :=[[xEnd,yEnd,zEnd],[0,0,1,0],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
 
             PathToConvFromHome;
             MoveL qwirkleLocation,v1000,z100,tool0\WObj:=wobj0;
-            !turnOnVacuum;
-            !turnOnGripper;
+            WaitTime 1;
+            turnOnVacuum;
+            turnOnGripper;
             ResetConveyorPath;
             PathToHomeFromConv;
-            WaitTime 0.5;
+            WaitTime 1;
             MoveL qwirklePlacement,v1000,z100,tool0\WObj:=wobj0;
             RotateTool orientation,qwirklePlacement;
             IF (yEnd < -400) THEN
@@ -90,12 +96,21 @@ MODULE DecorationFinal
     ENDPROC
 
     PROC RotateTool(num Orientation,robtarget a)
-        MoveL RelTool(a,0,0,0,\Rz:= Orientation),v1000,fine,tool0\WObj:=wobj0;
-        !WaitTime 2;
-        !turnOffGripper;
-        !turnOffVacuum;
-        WaitTime 1;
-        
+        IF Orientation > 90 THEN
+            Orientation := 90 - Orientation;
+            MoveL RelTool(a,0,0,0,\Rz:= Orientation),v1000,fine,tool0\WObj:=wobj0;
+            WaitTime 1;
+            turnOffGripper;
+            turnOffVacuum;
+            WaitTime 1;
+        ELSE    
+            MoveL RelTool(a,0,0,0,\Rz:= Orientation),v1000,fine,tool0\WObj:=wobj0;
+            WaitTime 1;
+            turnOffGripper;
+            turnOffVacuum;
+            WaitTime 1;
+        ENDIF
+            
     ENDPROC
     
     PROC LeftSidePath()
