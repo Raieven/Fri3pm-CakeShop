@@ -1,6 +1,6 @@
 % Author: WENJIE MAO
 % ID: z5097983
-% Date: 23/08/2019
+% Date: 27/08/2019
 % Description: Detect letters in the text and generate the trajectory.
 % MTRN4230 Group Assignment
 % Computer Vision program for ink printing 
