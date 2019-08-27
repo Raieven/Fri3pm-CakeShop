@@ -48,7 +48,7 @@ MODULE CakeShopServer
     VAR num numBlocks;
     ! Number of left over blocks on conveyor.
     VAR num numLeftOver;
-    
+
     ! Flag to see if a message was received
     VAR bool messageFlag;
 
@@ -84,6 +84,12 @@ MODULE CakeShopServer
     PERS bool vacuumError;
     PERS bool clearMessage;
 
+    VAR intnum lightCurtain;
+    VAR intnum emergencyStop;
+    VAR intnum emergencyStopMotor;
+    
+    VAR num tempConv;
+    VAR num response;
 
     PROC Main()
 	IF RobOS()  THEN
@@ -92,9 +98,19 @@ MODULE CakeShopServer
 		host:="127.0.0.1";
 	ENDIF
         ListenForAndAcceptConnection client_socket,host,port;
+        CONNECT lightCurtain WITH lTrap;
+        CONNECT emergencyStop WITH eTrap;
+        CONNECT emergencyStopMotor WITH eTrapMotor;
+
+        ISignalDO\Single,DO_LIGHT_CURTAIN,0,lightCurtain;
+        ISignalDO\Single,DO_ESTOP,1,emergencyStop;
+        ISignalDO\Single,DO_ESTOP2,0,emergencyStopMotor;
         WHILE stopFlag = FALSE DO
             MainServer;
         ENDWHILE
+        IDelete emergencyStop;
+        IDelete emergencyStopMotor;
+        IDelete lightCurtain;
         CloseConnection client_socket;
     ENDPROC
 
@@ -105,14 +121,14 @@ MODULE CakeShopServer
         !errorMessage:="errorerror";
 
         !ListenForAndAcceptConnection client_socket,host,port;
-        
         messageFlag := FALSE;
 
         receiveMessage client_socket,messageArray;
-        
+
         IF messageFlag = TRUE THEN
             parseString messageArray,blockArray,leftOverArray,numBlocks,numLeftOver,letterArray,numLetters,numCoordinates;
         ENDIF
+
         !sendError client_socket,errorMessage;
 
         IF robotMoving=FALSE THEN
@@ -193,7 +209,7 @@ MODULE CakeShopServer
         SocketSend client_socket\Str:=(ack_str+"\0A");
         count:=count+1;
         WHILE (received_str<>(end_str+"\0A")) DO
-            SocketReceive client_socket\Str:=received_str;
+            SocketReceive client_socket\Str:=received_str\Time:=WAIT_MAX;
             messageArray{count}:=received_str;
             SocketSend client_socket\Str:=(ack_str+"\0A");
             !            !IF count MOD 2 = 1 THEN
@@ -227,14 +243,6 @@ MODULE CakeShopServer
     PROC sendRobotUpdate(VAR socketdev client_socket,string message)
         SocketSend client_socket\Str:=("3, "+message+"\0A");
     ENDPROC
-    
-    PROC sendPaused(VAR socketdev client_socket, string message)
-        SocketSend client_socket\Str:=("4, "+message+"\0A");
-    ENDPROC
-    
-    PROC sendResumed(VAR socketdev client_socket, string message)
-        SocketSend client_socket\Str:=("6, "+message+"\0A");
-    ENDPROC
 
     ! INPUT
     !   string messageArray{*} - Array of strings which contains the message
@@ -266,18 +274,10 @@ MODULE CakeShopServer
             numCoordinatesCopy:=numCoordinates;
             letters:=TRUE;
         ELSEIF messageArray{1}="4\0A" THEN
-            pauseResume := FALSE;
-            IF pauseResume = FALSE THEN
-                sendPaused client_socket, "Paused";
-            ELSE 
-                sendResumed client_socket, "Failed to Pause";
-            ENDIF
-        ELSEIF messageArray{1}="6\0A" THEN
-            pauseResume := TRUE;
             IF pauseResume = TRUE THEN
-                sendResumed client_socket, "Resumed";
-            ELSE 
-                sendPaused client_socket, "Failed to Resume";
+                pauseResume := FALSE;
+            ELSE
+                pauseResume := TRUE;
             ENDIF
         ELSEIF messageArray{1} = "5\0A" THEN
             stopFlag := TRUE;
@@ -393,31 +393,33 @@ MODULE CakeShopServer
         ENDFOR
 
         !count := 1;
-        FOR i FROM 1 TO numLeftOver DO
-            FOR j FROM 1 TO 6 DO
-                convertStatus:=StrToVal(messageArray{posInStr},leftOverArray{i,j});
-                posInStr:=posInStr+1;
+        IF numLeftOver <> 0 THEN
+            FOR i FROM 1 TO numLeftOver DO
+                FOR j FROM 1 TO 6 DO
+                    convertStatus:=StrToVal(messageArray{posInStr},leftOverArray{i,j});
+                    posInStr:=posInStr+1;
+                ENDFOR
+                !            !x coordinate of leftover block
+                !            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,1});
+                !            posInStr := posInStr + 1;
+                !            !y coordinate of leftover block
+                !            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,2});
+                !            posInStr := posInStr + 1;
+                !            !z coordinate of leftover block
+                !            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,3});
+                !            posInStr := posInStr + 1;
+                !            !x coordinate of junk area
+                !            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,4});
+                !            posInStr := posInStr + 1;
+                !            !y coordinate of junk area
+                !            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,5});
+                !            posInStr := posInStr + 1;
+                !            !z coordinate of junk area
+                !            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,6});
+                !            posInStr := posInStr + 1;
+                !            count := count + 1;
             ENDFOR
-            !            !x coordinate of leftover block
-            !            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,1});
-            !            posInStr := posInStr + 1;
-            !            !y coordinate of leftover block
-            !            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,2});
-            !            posInStr := posInStr + 1;
-            !            !z coordinate of leftover block
-            !            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,3});
-            !            posInStr := posInStr + 1;
-            !            !x coordinate of junk area
-            !            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,4});
-            !            posInStr := posInStr + 1;
-            !            !y coordinate of junk area
-            !            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,5});
-            !            posInStr := posInStr + 1;
-            !            !z coordinate of junk area
-            !            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,6});
-            !            posInStr := posInStr + 1;
-            !            count := count + 1;
-        ENDFOR
+        ENDIF
 
     ENDPROC
 
@@ -455,5 +457,108 @@ MODULE CakeShopServer
 
 
     ENDPROC
+
+! light curtain trap routine
+    TRAP lTrap
+        ! stop the robot & conveyor
+        StopMove;
+        IF DOutput(DO10_3)=1 THEN
+            turnOffConveyor;
+            tempConv:=1;
+        ENDIF
+        ! print message to gui
+        lightCurtainError:=TRUE;
+        ! print message to flex pendant
+        TPErase;
+        TPWrite "Light curtain obstruction";
+        TPReadFK response,"Please remove obstruction",stEmpty,stEmpty,stEmpty,"No","Fixed";
+        IF response=4 THEN
+            TPErase;
+            TPWrite "Exiting program...";
+            WaitTime 2;
+            EXIT;
+        ELSEIF response=5 THEN
+            TPErase;
+            TPWrite "Resuming...";
+            clearMessage:=TRUE;
+        ENDIF
+        StartMove;
+        IF tempConv=1 THEN
+            turnOnConveyor;
+            tempConv:=0;
+        ENDIF
+        lightCurtainError:=FALSE;
+        RETURN ;
+    ENDTRAP
+
+    ! emergency stop interrupt for red buttons except motor
+    TRAP eTrap
+        ! stop the robot
+        StopMove;
+        IF DOutput(DO10_3)=1 THEN
+            turnOffConveyor;
+            tempConv:=1;
+        ENDIF
+        ! print message to gui
+        emergencyStopError:=TRUE;
+        ! print message to flex pendant
+        TPErase;
+        TPWrite "Emergency stop!";
+        TPWrite "Please remove any obstructions and hazards from the robot.";
+        TPWrite "Don't forget to reset the light curtain.";
+        TPReadFK response,"Restart?",stEmpty,stEmpty,stEmpty,"No","Yes";
+        IF response=4 THEN
+            TPErase;
+            TPWrite "Exiting program...";
+            WaitTime 2;
+            EXIT;
+        ELSEIF response=5 THEN
+            TPErase;
+            TPWrite "Resuming...";
+            clearMessage:=TRUE;
+        ENDIF
+        StartMove;
+        IF tempConv=1 THEN
+            turnOnConveyor;
+            tempConv:=0;
+        ENDIF
+        emergencyStopError:=FALSE;
+        RETURN ;
+    ENDTRAP
+
+    ! emergency stop interrupt for motor button
+    TRAP eTrapMotor
+        ! stop the robot
+        StopMove;
+        IF DOutput(DO10_3)=1 THEN
+            turnOffConveyor;
+            tempConv:=1;
+        ENDIF
+        ! print message to gui
+        emergencyStopError:=TRUE;
+        ! print message to flex pendant
+        TPErase;
+        TPWrite "Motor stop!";
+        TPWrite "Please remove any obstructions and hazards from the robot.";
+        TPWrite "Don't forget to reset the light curtain.";
+        TPReadFK response,"Restart?",stEmpty,stEmpty,stEmpty,"No","Yes";
+        IF response=4 THEN
+            TPErase;
+            TPWrite "Exiting program...";
+            WaitTime 2;
+            EXIT;
+        ELSEIF response=5 THEN
+            TPErase;
+            TPWrite "Resuming...";
+            clearMessage:=TRUE;
+        ENDIF
+        StartMove;
+        IF tempConv=1 THEN
+            turnOnConveyor;
+            tempConv:=0;
+        ENDIF
+        emergencyStopError:=FALSE;
+        RETURN ;
+    ENDTRAP
 
 ENDMODULE
