@@ -4,14 +4,14 @@ function main()
     
     global default_table_image default_conveyor_image
     % setup table camera
-    [table_camera table_camera_source] = connect_to_camera(1);
+    [table_camera table_camera_source] = connect_to_camera([]);
     table_camera_parameters = set_camera_parameters(table_camera_source, []);
     table_camera_parameters(1) = -4;
     set_camera_parameters(table_camera_source, table_camera_parameters);
     default_table_image = imread('default_table.jpg');
     
     % setup conveyor camera
-    [conveyor_camera, conveyor_camera_source] = connect_to_camera(2);
+    [conveyor_camera, conveyor_camera_source] = connect_to_camera([],[]);
     conveyor_camera_parameters = set_camera_parameters(conveyor_camera_source, []);
     conveyor_camera_parameters(1) = -6;
     set_camera_parameters(conveyor_camera_source, conveyor_camera_parameters);
@@ -23,7 +23,7 @@ function main()
     ink = InkPrinting;
     decoration = DecorationPaperConv850;
     
-    TcpIp.open('127.0.0.1', 20000);
+    TcpIp.open('192.168.125.1', 1025);
 
     % create main figure
     main_window = figure;
@@ -112,8 +112,14 @@ function main()
     
     [ink_out, Traj, aj] = ink.update(table_image);
     [normal, bold] = parse_letters(ink_out);
-    
-    [a, b, theta] = decoration.update(table_image, conveyor_image);
+    detectedCakeBlocks = [];
+    detectedCakeBlocksCentres = [];
+    cakeBlockUnmatchedIndex = [];
+    detectedConvBlocks = [];
+    [blockOrder,leftOverBlocks,cakeBlockUnmatchedIndex,...
+            prevcake,prevdetectedCakeBlocks,...
+            prevdetectedCakeBlocksCentres,detectedConvBlocks] = decoration.update(table_image, conveyor_image,cakeBlockUnmatchedIndex,...
+                                                                            detectedCakeBlocks,detectedCakeBlocksCentres,detectedConvBlocks);
     
     conveyor_out_imshow = imshow(conveyor_image, 'Parent', conveyor_out_ax);
     hold on;
@@ -197,10 +203,17 @@ end
 
 function [camera, cam_source] = connect_to_camera(varargin)
     cams = imaqhwinfo;
-    if length(cams.InstalledAdaptors) >= 2
+    if length(cams.InstalledAdaptors) >= 1
         if nargin == 0 || nargin == 1
             camera = videoinput('winvideo', 1, 'MJPG_1600x1200'); 
-
+%             camera = videoinput('winvideo', 1, 'YUY2_1280x720'); 
+            
+            cam_source = getselectedsource(camera);
+            cam_source.ExposureMode = 'manual';
+        end
+        if nargin == 0 || nargin == 2
+            camera = videoinput('winvideo', 2, 'MJPG_1600x1200'); 
+%             camera = videoinput('winvideo', 2, 'YUY2_1280x720');
             cam_source = getselectedsource(camera);
             cam_source.ExposureMode = 'manual';
         end
@@ -291,11 +304,12 @@ function decoration_button_down(~,~)
     detectedCakeBlocks = [];
     detectedCakeBlocksCentres = [];
     cakeBlockUnmatchedIndex = [];
+    detectedConvBlocks = [];
     if decoration.completeCakeFlag == 0
         [blockOrder,leftOverBlocks,cakeBlockUnmatchedIndex,...
-            UnmatchedBlocksFlag,prevcake,prevdetectedCakeBlocks,...
-            prevdetectedCakeBlocksCentres] = decoration.update(table_image, conveyor_image,cakeBlockUnmatchedIndex,...
-                                                                            detectedCakeBlocks,detectedCakeBlocksCentres);
+            prevcake,prevdetectedCakeBlocks,...
+            prevdetectedCakeBlocksCentres,detectedConvBlocks] = decoration.update(table_image, conveyor_image,cakeBlockUnmatchedIndex,...
+                                                                            detectedCakeBlocks,detectedCakeBlocksCentres,detectedConvBlocks);
         TcpIp.send_decorations(blockOrder,leftOverBlocks);
         while (messageType ~= 3)
             [messageString, messageType] = TcpIp.receive();
@@ -308,9 +322,9 @@ function decoration_button_down(~,~)
             messageType = -1;
             conveyor_image = get_image(conveyor_camera, default_conveyor_image);
             [blockOrder,leftOverBlocks,cakeBlockUnmatchedIndex,...
-                UnmatchedBlocksFlag,prevcake,prevdetectedCakeBlocks,...
-                prevdetectedCakeBlocksCentres] = decoration.update(prevcake, conveyor_image,cakeBlockUnmatchedIndex,...
-                                                                            prevdetectedCakeBlocks,prevdetectedCakeBlocksCentres);
+                prevcake,prevdetectedCakeBlocks,...
+                prevdetectedCakeBlocksCentres,detectedConvBlocks] = decoration.update(prevcake, conveyor_image,cakeBlockUnmatchedIndex,...
+                                                                            prevdetectedCakeBlocks,prevdetectedCakeBlocksCentres,detectedConvBlocks);
             TcpIp.send_decorations(blockOrder,leftOverBlocks);
             while (messageType ~= 3)
                 [messageString, messageType] = TcpIp.receive();
