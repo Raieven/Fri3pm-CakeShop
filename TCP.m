@@ -74,16 +74,17 @@ end
 function send_decorations(blockOrder, leftOverBlocks)
     global tcpip_internal;
 % send decoration data to robot
-    networksend(tcpip_internal, blockOrder, leftOverBlocks, 1);
+    
     fprintf('sending decoration data\n');
+    networksend(tcpip_internal, blockOrder, leftOverBlocks, 1);
 end
 
 function send_ink_printing(Traj)
     global tcpip_internal;
 % send ink data to robot
-    networksend(tcpip_internal, Traj, 0, 2);
+    
     fprintf('sending ink data\n');
-
+    networksend(tcpip_internal, Traj, 0, 2);
 end
 
 function send_pause_resume()
