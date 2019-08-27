@@ -18,7 +18,7 @@ MODULE CakeShopServer
 
     ! The host and port that we will be listening for a connection on. Currently set to localhost.
     PERS string host:="127.0.0.1";
-    CONST num port:=20000;
+    CONST num port:=1025;
 
     ! Array of letter coordinates
     ! Dimension 1 is the type of data i.e. 1 = boldness, 2 = x coordinate, 3 = y coordinate
@@ -83,7 +83,11 @@ MODULE CakeShopServer
 
 
     PROC Main()
-        host:="127.0.0.1";
+	IF RobOS()  THEN
+	        host:="192.168.125.1";
+	ELSE
+		host:="127.0.0.1";
+	ENDIF
         ListenForAndAcceptConnection client_socket,host,port;
         WHILE stopFlag = FALSE DO
             MainServer;
@@ -110,16 +114,16 @@ MODULE CakeShopServer
         ENDIF
         
         IF lightCurtainError=TRUE THEN
-            sendError client_socket,"Light Curtain Obstruction.Please check Flex Pendant";
+            sendError client_socket,"Light Curtain Obstruction. Please check Flex Pendant";
         ENDIF   
         IF emergencyStopError=TRUE THEN
-            sendError client_socket,"Emergency Stop occured.Please check Flex Pendant";
+            sendError client_socket,"Emergency Stop occured. Please check Flex Pendant";
         ENDIF 
         IF conveyorError=TRUE THEN
-            sendError client_socket,"Conveyor Error.Please check Flex Pendant";
+            sendError client_socket,"Conveyor Error. Please check Flex Pendant";
         ENDIF 
         IF vacuumError=TRUE THEN
-            sendError client_socket,"Vacuum Error.Please check Flex Pendant";
+            sendError client_socket,"Vacuum Error. Please check Flex Pendant";
         ENDIF 
         IF clearMessage=TRUE THEN
             sendError client_socket,"";
@@ -214,6 +218,14 @@ MODULE CakeShopServer
     PROC sendRobotUpdate(VAR socketdev client_socket,string message)
         SocketSend client_socket\Str:=("3, "+message+"\0A");
     ENDPROC
+    
+    PROC sendPaused(VAR socketdev client_socket, string message)
+        SocketSend client_socket\Str:=("4, "+message+"\0A");
+    ENDPROC
+    
+    PROC sendResumed(VAR socketdev client_socket, string message)
+        SocketSend client_socket\Str:=("6, "+message+"\0A");
+    ENDPROC
 
     ! INPUT
     !   string messageArray{*} - Array of strings which contains the message
@@ -245,10 +257,18 @@ MODULE CakeShopServer
             numCoordinatesCopy:=numCoordinates;
             letters:=TRUE;
         ELSEIF messageArray{1}="4\0A" THEN
+            pauseResume := FALSE;
+            IF pauseResume = FALSE THEN
+                sendPaused client_socket, "Paused";
+            ELSE 
+                sendResumed client_socket, "Failed to Pause";
+            ENDIF
+        ELSEIF messageArray{1}="6\0A" THEN
+            pauseResume := TRUE;
             IF pauseResume = TRUE THEN
-                pauseResume := FALSE;
-            ELSE
-                pauseResume := TRUE;
+                sendResumed client_socket, "Resumed";
+            ELSE 
+                sendPaused client_socket, "Failed to Resume";
             ENDIF
         ELSEIF messageArray{1} = "5\0A" THEN
             stopFlag := TRUE;
