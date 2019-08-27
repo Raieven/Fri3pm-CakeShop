@@ -21,7 +21,7 @@ function main()
     global TcpIp ink decoration;
     TcpIp = TCP();
     ink = InkPrinting;
-    decoration = Decoration;
+    decoration = DecorationPaperConv850;
     
     TcpIp.open('127.0.0.1', 20000);
 
@@ -120,7 +120,8 @@ function main()
     ink_bold = plot(bold.x(:), bold.y(:), 'r');
     ink_normal = plot(normal.x(:), normal.y(:), 'y');
     hold off;
-
+    
+    % This is when the in ink stuff is complelre
     running = 1;
 
     while(running)
@@ -141,6 +142,8 @@ function main()
         
         drawnow limitrate;
         pause(0.05);
+        
+        
     end
 end
 
@@ -283,13 +286,33 @@ function decoration_button_down(~,~)
     global TcpIp decoration;
     global table_image;
     global conveyor_image;
+    decoration.completeCakeFlag = 0;
+    detectedCakeBlocks = [];
+    detectedCakeBlocksCentres = [];
+    cakeBlockUnmatchedIndex = [];
+    if decoration.completeCakeFlag == 0
+        [blockOrder,leftOverBlocks,cakeBlockUnmatchedIndex,...
+            UnmatchedBlocksFlag,prevcake,prevdetectedCakeBlocks,...
+            prevdetectedCakeBlocksCentres] = decoration.update(table_image, conveyor_image,cakeBlockUnmatchedIndex,...
+                                                                            detectedCakeBlocks,detectedCakeBlocksCentres);
+        TcpIp.send_decorations(blockOrder,leftOverBlocks);
+        [messageString, messageType] = TcpIp.receive();
+        if (messageType == 0)
+            fprintf('%s\n', messageString);
+        end
+        while UnmatchedBlocksFlag == 1
+            conveyor_image = get_image(conveyor_camera, default_conveyor_image);
+            [blockOrder,leftOverBlocks,cakeBlockUnmatchedIndex,...
+                UnmatchedBlocksFlag,prevcake,prevdetectedCakeBlocks,...
+                prevdetectedCakeBlocksCentres] = decoration.update(prevcake, conveyor_image,cakeBlockUnmatchedIndex,...
+                                                                            prevdetectedCakeBlocks,prevdetectedCakeBlocksCentres);
+            TcpIp.send_decorations(blockOrder,leftOverBlocks);
+        end
+    end
+    decoration.completeCakeFlag = 1;
     
-    [a] = decoration.update(table_image, conveyor_image);
-    
-    TcpIp.send_decorations(a);
     [messageString, messageType] = TcpIp.receive();
     if (messageType == 0)
         fprintf('%s\n', messageString);
     end
 end
-
