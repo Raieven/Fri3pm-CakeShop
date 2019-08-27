@@ -286,6 +286,7 @@ function decoration_button_down(~,~)
     global TcpIp decoration;
     global table_image;
     global conveyor_image;
+    messageType = -1;
     decoration.completeCakeFlag = 0;
     detectedCakeBlocks = [];
     detectedCakeBlocksCentres = [];
@@ -296,23 +297,34 @@ function decoration_button_down(~,~)
             prevdetectedCakeBlocksCentres] = decoration.update(table_image, conveyor_image,cakeBlockUnmatchedIndex,...
                                                                             detectedCakeBlocks,detectedCakeBlocksCentres);
         TcpIp.send_decorations(blockOrder,leftOverBlocks);
-        [messageString, messageType] = TcpIp.receive();
-        if (messageType == 0)
-            fprintf('%s\n', messageString);
+        while (messageType ~= 3)
+            [messageString, messageType] = TcpIp.receive();
+            if (messageType == 0)
+                fprintf('%s\n', messageString)
+                return;
+            end
         end
         while UnmatchedBlocksFlag == 1
+            messageType = -1;
             conveyor_image = get_image(conveyor_camera, default_conveyor_image);
             [blockOrder,leftOverBlocks,cakeBlockUnmatchedIndex,...
                 UnmatchedBlocksFlag,prevcake,prevdetectedCakeBlocks,...
                 prevdetectedCakeBlocksCentres] = decoration.update(prevcake, conveyor_image,cakeBlockUnmatchedIndex,...
                                                                             prevdetectedCakeBlocks,prevdetectedCakeBlocksCentres);
             TcpIp.send_decorations(blockOrder,leftOverBlocks);
+            while (messageType ~= 3)
+                [messageString, messageType] = TcpIp.receive();
+                if (messageType == 0)
+                    fprintf('%s\n', messageString)
+                    return;
+                end
+            end
         end
     end
     decoration.completeCakeFlag = 1;
     
-    [messageString, messageType] = TcpIp.receive();
-    if (messageType == 0)
-        fprintf('%s\n', messageString);
-    end
+%     [messageString, messageType] = TcpIp.receive();
+%     if (messageType == 0)
+%         fprintf('%s\n', messageString);
+%     end
 end

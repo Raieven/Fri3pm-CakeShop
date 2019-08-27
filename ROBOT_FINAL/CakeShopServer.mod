@@ -48,6 +48,9 @@ MODULE CakeShopServer
     VAR num numBlocks;
     ! Number of left over blocks on conveyor.
     VAR num numLeftOver;
+    
+    ! Flag to see if a message was received
+    VAR bool messageFlag;
 
     ! A copy of relevant variables above to be shared with T_ROB
     PERS num letterArrayCopy{3,100,1000};
@@ -102,11 +105,14 @@ MODULE CakeShopServer
         !errorMessage:="errorerror";
 
         !ListenForAndAcceptConnection client_socket,host,port;
+        
+        messageFlag := FALSE;
 
         receiveMessage client_socket,messageArray;
-
-        parseString messageArray,blockArray,leftOverArray,numBlocks,numLeftOver,letterArray,numLetters,numCoordinates;
-
+        
+        IF messageFlag = TRUE THEN
+            parseString messageArray,blockArray,leftOverArray,numBlocks,numLeftOver,letterArray,numLetters,numCoordinates;
+        ENDIF
         !sendError client_socket,errorMessage;
 
         IF robotMoving=FALSE THEN
@@ -181,8 +187,8 @@ MODULE CakeShopServer
         !errorMessage := "errorerror";
 
         ! Receive a string from the client.
-        SocketReceive client_socket\Str:=received_str;
-
+        SocketReceive client_socket\Str:=received_str\Time:=1;
+        messageFlag := TRUE;
         messageArray{count}:=received_str;
         SocketSend client_socket\Str:=(ack_str+"\0A");
         count:=count+1;
@@ -202,6 +208,9 @@ MODULE CakeShopServer
             IF ERRNO=ERR_SOCK_CLOSED THEN
                 ListenForAndAcceptConnection client_socket,host,port;
                 RETRY;
+            ENDIF
+            IF ERRNO=ERR_SOCK_TIMEOUT THEN
+                RETURN;
             ENDIF
     ENDPROC
 
