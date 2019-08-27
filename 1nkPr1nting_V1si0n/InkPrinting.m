@@ -82,6 +82,13 @@ BWImage = bwpropfilt(BWImage,'Extent',[0.2,1]);
 
 CC = bwconncomp(BWImage);
 Text_Im = regionprops(CC, 'BoundingBox', 'Image', 'Centroid');
+
+% Check if there is text in the image
+if isempty(Text_Im)
+    fprintf('No letters detected!\n');
+    return; 
+end
+
 coords = vertcat(Text_Im.Centroid);
 
 if max(diff(coords(:, 2))) > 50
