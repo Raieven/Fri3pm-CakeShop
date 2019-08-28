@@ -99,12 +99,12 @@ function main()
     
     global table_image;
     % draw table camera
-    table_image = get_image(table_camera.DeviceID, default_table_image);
+    table_image = get_image(table_camera, default_table_image);
     table_imshow = imshow(table_image, 'Parent', table_cam_ax);
     
     global conveyor_image;
     % draw conveyor camera
-    conveyor_image = get_image(conveyor_camera.DeviceID, default_conveyor_image);
+    conveyor_image = get_image(conveyor_camera, default_conveyor_image);
     conveyor_imshow = imshow(conveyor_image, 'Parent', conveyor_cam_ax);
     
     
