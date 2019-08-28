@@ -17,7 +17,7 @@ MODULE CakeShopServer
     VAR socketdev client_socket;
 
     ! The host and port that we will be listening for a connection on. Currently set to localhost.
-    PERS string host:="192.168.125.1";
+    PERS string host:="127.0.0.1";
     CONST num port:=1025;
 
     ! Array of letter coordinates
@@ -48,6 +48,9 @@ MODULE CakeShopServer
     VAR num numBlocks;
     ! Number of left over blocks on conveyor.
     VAR num numLeftOver;
+
+    ! Flag to see if a message was received
+    VAR bool messageFlag;
 
     ! A copy of relevant variables above to be shared with T_ROB
     PERS num letterArrayCopy{3,100,1000};
@@ -81,11 +84,17 @@ MODULE CakeShopServer
     PERS bool vacuumError;
     PERS bool clearMessage;
 
+    VAR intnum lightCurtain;
+    VAR intnum emergencyStop;
+    VAR intnum emergencyStopMotor;
+    
+    VAR num tempConv;
+    VAR num response;
 
     PROC Main()
 	IF RobOS()  THEN
 	        host:="192.168.125.1";
-`	ELSE
+	ELSE
 		host:="127.0.0.1";
 	ENDIF
         ListenForAndAcceptConnection client_socket,host,port;
@@ -112,10 +121,13 @@ MODULE CakeShopServer
         !errorMessage:="errorerror";
 
         !ListenForAndAcceptConnection client_socket,host,port;
+        messageFlag := FALSE;
 
         receiveMessage client_socket,messageArray;
 
-        parseString messageArray,blockArray,leftOverArray,numBlocks,numLeftOver,letterArray,numLetters,numCoordinates;
+        IF messageFlag = TRUE THEN
+            parseString messageArray,blockArray,leftOverArray,numBlocks,numLeftOver,letterArray,numLetters,numCoordinates;
+        ENDIF
 
         !sendError client_socket,errorMessage;
 
@@ -191,13 +203,13 @@ MODULE CakeShopServer
         !errorMessage := "errorerror";
 
         ! Receive a string from the client.
-        SocketReceive client_socket\Str:=received_str;
-
+        SocketReceive client_socket\Str:=received_str\Time:=1;
+        messageFlag := TRUE;
         messageArray{count}:=received_str;
         SocketSend client_socket\Str:=(ack_str+"\0A");
         count:=count+1;
         WHILE (received_str<>(end_str+"\0A")) DO
-            SocketReceive client_socket\Str:=received_str;
+            SocketReceive client_socket\Str:=received_str\Time:=WAIT_MAX;
             messageArray{count}:=received_str;
             SocketSend client_socket\Str:=(ack_str+"\0A");
             !            !IF count MOD 2 = 1 THEN
@@ -212,6 +224,9 @@ MODULE CakeShopServer
             IF ERRNO=ERR_SOCK_CLOSED THEN
                 ListenForAndAcceptConnection client_socket,host,port;
                 RETRY;
+            ENDIF
+            IF ERRNO=ERR_SOCK_TIMEOUT THEN
+                RETURN;
             ENDIF
     ENDPROC
 
@@ -378,31 +393,33 @@ MODULE CakeShopServer
         ENDFOR
 
         !count := 1;
-        FOR i FROM 1 TO numLeftOver DO
-            FOR j FROM 1 TO 6 DO
-                convertStatus:=StrToVal(messageArray{posInStr},leftOverArray{i,j});
-                posInStr:=posInStr+1;
+        IF numLeftOver <> 0 THEN
+            FOR i FROM 1 TO numLeftOver DO
+                FOR j FROM 1 TO 6 DO
+                    convertStatus:=StrToVal(messageArray{posInStr},leftOverArray{i,j});
+                    posInStr:=posInStr+1;
+                ENDFOR
+                !            !x coordinate of leftover block
+                !            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,1});
+                !            posInStr := posInStr + 1;
+                !            !y coordinate of leftover block
+                !            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,2});
+                !            posInStr := posInStr + 1;
+                !            !z coordinate of leftover block
+                !            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,3});
+                !            posInStr := posInStr + 1;
+                !            !x coordinate of junk area
+                !            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,4});
+                !            posInStr := posInStr + 1;
+                !            !y coordinate of junk area
+                !            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,5});
+                !            posInStr := posInStr + 1;
+                !            !z coordinate of junk area
+                !            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,6});
+                !            posInStr := posInStr + 1;
+                !            count := count + 1;
             ENDFOR
-            !            !x coordinate of leftover block
-            !            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,1});
-            !            posInStr := posInStr + 1;
-            !            !y coordinate of leftover block
-            !            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,2});
-            !            posInStr := posInStr + 1;
-            !            !z coordinate of leftover block
-            !            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,3});
-            !            posInStr := posInStr + 1;
-            !            !x coordinate of junk area
-            !            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,4});
-            !            posInStr := posInStr + 1;
-            !            !y coordinate of junk area
-            !            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,5});
-            !            posInStr := posInStr + 1;
-            !            !z coordinate of junk area
-            !            convertStatus := StrToVal(messageArray{posInStr},leftOverArray{i,6});
-            !            posInStr := posInStr + 1;
-            !            count := count + 1;
-        ENDFOR
+        ENDIF
 
     ENDPROC
 
