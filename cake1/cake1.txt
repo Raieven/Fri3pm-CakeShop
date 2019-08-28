@@ -1,0 +1,67 @@
+# Instrucions
+## Setting up
+1. Unzip the cake1.zip
+2. Open RobotStudio and in the share tab unpack the cake1.rspag
+   The files in the zipped folder should also exist in the solution folder where you unpacked cake1
+3. Open Matlab and navigate to either the unzipped cake1 folder or the solution folder
+   Any edits to .m files will be saved to the folder you work in
+
+## Running the program
+1. Go to Controller and open up a Virtual Flex Pendant
+2. Go to ABB > Program Editor
+    This will open another T_ROB. Then do:
+    a. Task and Programs and select T_COM1 > Show Modules
+    b. Locate CakeShopServer main and open that
+3. To the left of the joystick there is a little squar called Control Panel, select that and then select the middle option to enter manual mode
+4. Click on the square symbol botton right corner of the screen
+    a. Then click on gear shift ish button (next one up)
+    b. Make sure both T_COM and T_ROB are ticked
+    c. If only testing sending, only tick T_COM
+5. Along the bottom of the Flex Pendant, you should see T_COM and T_ROB main programs, set both pointers to Main (Debug > PP to Main)
+6. Then press Enable. This is needed to get out of Guard Stop and turn the Motors On
+7. Hold To Run (may need to toggle this to switch between T_COM and T_ROB if running simultaneously, may cause errors, dunno)
+8. Finally hit the play button
+9. Now run main.m (may need to run again if it says The name 'open' is not an accessible property for an instance of class 'TCPIP objects'.)
+   Read note on ip for simulations
+
+### Resetting the program
+1. Press stop on the Virtual Flex Pendant
+2. Repeat 4-8 from Running the program.
+   Make sure that the variables (line 67-75 of CakeShopServer)
+	PERS bool chocBlocks:=FALSE;
+    	PERS bool isDecorDone:=FALSE;
+	PERS bool letters:=FALSE;
+	PERS bool robotMoving:=FALSE;
+	PERS bool pauseResume:= TRUE;
+   if you are testing T_ROB1 otherwise the robot will move according to previous data
+
+#### Ink or Block
+ - If testing Ink printing
+	in CakeShopServer line 109, in the while loop, change to InkServer
+	in CakeShopRobotMain line 141, in the main procedure, change to IndivInkMain
+- If testing Block decorations
+	in CakeShopServer line 109, in the while loop, change to BlockServer
+	in CakeShopRobotMain line 141, in the main procedure, change to IndivDecMain
+
+###Synching to the actual robot
+1. Open RobotStudio
+2. Go to File > Share > Unpack and Go and load up the .rspag file
+3. Go to Controller > Add Controller > Local Controller
+    You should now see two stations: Vinnie and the IRB
+4. Go to both T_COMs and "Stop Task"
+5. Go to Controller > Create Relation
+    Name: put anything, I don't think it matters
+    2nd Box: the Vinnie station
+    3rd Box: the IRB station
+6. The Vinnie .mod files should sync up to the IRB station and in turn the Flex Pendant
+7. The IRB Station (192.168.125.1) must be selected to grant write access during transfer
+
+
+
+##Notes
+- anything changed on RobotStudio does not save unless we Pack and Go again (I think)
+- alternatively copy paste into a txt file or mod file in the folder you where working in (unzipped folder or solution folder)
+- Check that the IP (line 26) in main.m is correct. '192.168.125.1' for the robot and '127.0.0.1' for simulation
+- RobotStudio should automatically switch
+- Do not add messageArray or letterArray or letterArrayCopy to RAPID WATCH as this will slow down RobotStudio
+- The decoration vision file being used is DecorationFINAL.m
