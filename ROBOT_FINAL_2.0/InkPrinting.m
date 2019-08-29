@@ -86,8 +86,10 @@ Text_Im = regionprops(CC, 'BoundingBox', 'Image', 'Centroid');
 % Check if there is text in the image
 if isempty(Text_Im)
     fprintf('No letters detected!\n');
+    letters = []; Traj = {}; Draw = {};
     return; 
 end
+
 coords = vertcat(Text_Im.Centroid);
 
 if max(diff(coords(:, 2))) > 50
